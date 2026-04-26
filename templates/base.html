@@ -48,8 +48,7 @@
         <a href="{% url 'store:cart' %}" class="btn btn-outline-warning btn-sm position-relative">
           <i class="bi bi-cart3"></i>
           {% if cart_count > 0 %}
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ cart_count
-            }}</span>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ cart_count }}</span>
           {% endif %}
         </a>
       </div>
@@ -106,8 +105,7 @@
             <i class="bi bi-cart3"></i>
             <span>Cart</span>
             {% if cart_count > 0 %}
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ cart_count
-              }}</span>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ cart_count }}</span>
             {% endif %}
           </a>
 

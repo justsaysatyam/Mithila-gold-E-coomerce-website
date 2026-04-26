@@ -31,6 +31,9 @@
           <a href="{% url 'store:contact' %}" class="btn btn-outline-warning btn-lg px-5 py-3 fw-bold">
             <i class="bi bi-telephone me-2"></i>Contact Us
           </a>
+          <a href="#founder" class="btn btn-outline-light btn-lg px-5 py-3 fw-bold shadow-sm" style="background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.2);">
+            <i class="bi bi-person-badge me-2"></i>Meet Founder
+          </a>
           <a href="{% url 'store:admin_dashboard' %}" class="btn btn-danger btn-lg px-5 py-3 fw-bold shadow-sm">
             <i class="bi bi-shield-lock-fill me-2"></i>Admin Panel
           </a>
@@ -201,6 +204,38 @@
           <h6>Expert Support</h6>
           <p>Talk to our team for bulk & corporate orders</p>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOUNDER & DEVELOPER SECTION ══════════ -->
+<section class="py-5 bg-white" id="founder">
+  <div class="container text-center">
+    <div class="section-header">
+      <h2 class="section-title">Meet the <span class="text-gradient">Visionary</span></h2>
+      <p class="section-subtitle">Founder & Lead Developer of Mithila Gold</p>
+    </div>
+    
+    <div class="founder-card mx-auto">
+      <div class="founder-img-wrapper">
+        <img src="{% static 'img/founder.png' %}" alt="Satyam Kumar Jha" class="founder-img" 
+             onerror="this.onerror=null;this.src='{% static 'img/product_placeholder.svg' %}'">
+      </div>
+      <h3 class="founder-name">Satyam Kumar Jha</h3>
+      <div class="founder-role">Founder & Developer</div>
+      <p class="founder-info">
+        <i class="bi bi-mortarboard-fill me-2"></i><strong>Qualification:</strong> MCA (Master of Computer Applications)<br>
+        <span class="opacity-75">Driven by a passion for technology and the traditions of Mithila, 
+        Satyam has bridged the gap between heritage and e-commerce to bring Mithila Gold to your doorstep.</span>
+      </p>
+      <div class="founder-social-btns d-flex flex-wrap justify-content-center gap-3">
+        <a href="https://www.linkedin.com/in/satyam-kumar-jha-77774139b/" target="_blank" class="btn btn-primary d-flex align-items-center gap-2">
+          <i class="bi bi-linkedin"></i> LinkedIn Profile
+        </a>
+        <a href="tel:6202822415" class="btn btn-outline-dark d-flex align-items-center gap-2">
+          <i class="bi bi-telephone-outbound"></i> Call: 6202822415
+        </a>
       </div>
     </div>
   </div>
