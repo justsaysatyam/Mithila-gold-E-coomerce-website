@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- ══════════ HERO SECTION ══════════ -->
+<section class="hero-section position-relative overflow-hidden">
+  <div class="hero-bg-pattern"></div>
+  <div class="container py-5">
+    <div class="row align-items-center min-vh-70 py-5">
+      <div class="col-lg-6 text-center text-lg-start">
+        <div class="hero-badge badge-farm mb-3">
+          🪷 Darbhanga, Mithila, Bihar
+        </div>
+        <h1 class="hero-title">
+          <span class="gold-shimmer">Mithila Gold</span><br>
+          <span style="font-size:0.7em;font-weight:500;color:rgba(253,246,227,0.9);">Makhana</span>
+        </h1>
+        <p class="hero-tagline hindi-text">
+          मिथिला की धरोहर — हर कौर में।
+        </p>
+        <p class="hero-subtitle">
+          Premium <strong>makhana</strong> (fox nuts) handpicked from the
+          sacred wetlands of <strong>Mithila</strong>, Bihar.
+          Pure, crunchy, and tradition-crafted.
+        </p>
+        <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start mt-4">
+          <a href="{% url 'store:product_list' %}" class="btn btn-farm-primary btn-lg px-5 py-3 fw-bold">
+            <i class="bi bi-grid-3x3-gap-fill me-2"></i>Shop Now
+          </a>
+          <a href="{% url 'store:contact' %}" class="btn btn-outline-warning btn-lg px-5 py-3 fw-bold">
+            <i class="bi bi-telephone me-2"></i>Contact Us
+          </a>
+          <a href="{% url 'store:admin_dashboard' %}" class="btn btn-danger btn-lg px-5 py-3 fw-bold shadow-sm">
+            <i class="bi bi-shield-lock-fill me-2"></i>Admin Panel
+          </a>
+        </div>
+
+        <!-- Quick Contact Pills -->
+        <div class="d-flex flex-wrap gap-2 mt-4 justify-content-center justify-content-lg-start">
+          <a href="tel:7546835444" class="contact-pill">
+            <i class="bi bi-telephone-fill"></i> Jay Jha: 7546835444
+          </a>
+          <span class="contact-pill">
+            <i class="bi bi-award-fill"></i> GI Tagged Makhana
+          </span>
+        </div>
+      </div>
+
+      <div class="col-lg-6 text-center mt-5 mt-lg-0">
+        <div class="hero-image-wrapper">
+          <img src="{% static 'img/logo.png' %}" alt="Mithila Gold" class="hero-logo-img animate-float"
+               onerror="this.onerror=null;this.src='{% static 'img/product_placeholder.svg' %}'">
+          <div class="hero-circle-1"></div>
+          <div class="hero-circle-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ STATS STRIP ══════════ -->
+<section class="stats-strip py-4" style="background:var(--dark-warm,#2A0F16);">
+  <div class="container">
+    <div class="row g-3 text-center">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon">🪷</div>
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Natural & Pure</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon">🏅</div>
+          <div class="stat-number">GI</div>
+          <div class="stat-label">Tagged Product</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon">🌿</div>
+          <div class="stat-number">10+</div>
+          <div class="stat-label">Varieties</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-number">Fast</div>
+          <div class="stat-label">Pan-India Delivery</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CATEGORIES ══════════ -->
+<section class="py-5">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Our <span class="text-gradient">Categories</span></h2>
+      <p class="section-subtitle">Premium makhana in many forms — tradition meets taste</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      {% for cat in categories %}
+      <div class="col-sm-6 col-lg-3">
+        <a href="{% url 'store:product_list' %}?category={{ cat.slug }}" class="category-card" style="text-decoration:none;">
+          <div class="category-icon">{{ cat.icon }}</div>
+          <h5>{{ cat.name }}</h5>
+          <p>{{ cat.description }}</p>
+        </a>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center text-muted">
+        <p>No categories available.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FEATURED PRODUCTS ══════════ -->
+{% if featured_products %}
+<section class="py-5 bg-light-farm">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Featured <span class="text-gradient">Products</span></h2>
+      <p class="section-subtitle">Handpicked favourites from our Mithila collection</p>
+    </div>
+    <div class="row g-4">
+      {% for product in featured_products %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="product-card h-100">
+          <a href="{% url 'store:product_detail' product.pk %}" class="product-img-link">
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-img">
+          </a>
+          <div class="product-card-body">
+            <span class="product-category-badge">{{ product.category }}</span>
+            <h6 class="product-name mt-2">
+              <a href="{% url 'store:product_detail' product.pk %}">{{ product.name }}</a>
+            </h6>
+            <div class="product-price">₹{{ product.price }}</div>
+            {% if product.in_stock %}
+              <form action="{% url 'store:add_to_cart' product.pk %}" method="post" class="mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-farm-primary btn-sm w-100">
+                  <i class="bi bi-cart-plus"></i> Add to Cart
+                </button>
+              </form>
+            {% else %}
+              <button class="btn btn-outline-secondary btn-sm w-100 mt-2" disabled>Out of Stock</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+      <a href="{% url 'store:product_list' %}" class="btn btn-outline-success btn-lg px-5">
+        View All Products <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ══════════ WHY US ══════════ -->
+<section class="py-5">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Why <span class="text-gradient">Mithila Gold?</span></h2>
+      <p class="section-subtitle">Heritage, purity & craft in every bite</p>
+    </div>
+    <div class="row g-4 text-center">
+      <div class="col-md-3 col-6">
+        <div class="why-card">
+          <div class="why-icon">🌿</div>
+          <h6>100% Natural</h6>
+          <p>No artificial colours, flavours or preservatives</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="why-card">
+          <div class="why-icon">🏅</div>
+          <h6>GI Tagged</h6>
+          <p>Authentic Mithila makhana, geographically certified</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="why-card">
+          <div class="why-icon">🚚</div>
+          <h6>Pan-India Delivery</h6>
+          <p>Delivered fresh to your doorstep across India</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="why-card">
+          <div class="why-icon">📞</div>
+          <h6>Expert Support</h6>
+          <p>Talk to our team for bulk & corporate orders</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA BANNER ══════════ -->
+<section class="cta-section py-5">
+  <div class="container text-center">
+    <h2 class="text-white fw-bold mb-3" style="font-family:'Cinzel',serif;">Ready to Order Mithila Gold?</h2>
+    <p class="mb-1" style="color:var(--gold-light);font-size:1.05rem;font-style:italic;">The Essence of Tradition in Every Crunch</p>
+    <p class="text-white opacity-75 mb-4">Register now and get exclusive access to order tracking and premium delivery.</p>
+    {% if not user.is_authenticated %}
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{% url 'store:register' %}" class="btn btn-warning btn-lg fw-bold px-5">Register Now 🌾</a>
+      <a href="{% url 'store:product_list' %}" class="btn btn-outline-light btn-lg px-5">Browse Products</a>
+    </div>
+    {% else %}
+    <a href="{% url 'store:product_list' %}" class="btn btn-warning btn-lg fw-bold px-5">Browse Products 🛒</a>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

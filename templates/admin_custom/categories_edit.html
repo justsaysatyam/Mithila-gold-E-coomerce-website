@@ -1,0 +1,45 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block title %}Edit Category | {{ category.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'store:admin_categories_list' %}" class="text-decoration-none" style="color:var(--admin-muted);">
+    <i class="bi bi-arrow-left"></i> Back to Categories
+  </a>
+</div>
+
+<h2 class="h4 mb-4 fw-bold">Edit Category</h2>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="adm-card p-4">
+      <form action="" method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label" style="color:var(--admin-muted);">Category Name *</label>
+          <input type="text" name="name" class="form-control adm-input" required value="{{ category.name }}">
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label" style="color:var(--admin-muted);">Slug (URL friendly) *</label>
+          <input type="text" name="slug" class="form-control adm-input" required value="{{ category.slug }}">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" style="color:var(--admin-muted);">Description</label>
+          <input type="text" name="description" class="form-control adm-input" value="{{ category.description }}">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" style="color:var(--admin-muted);">Icon (Emoji or Symbol)</label>
+          <input type="text" name="icon" class="form-control adm-input" required value="{{ category.icon }}" style="font-size:1.5rem; width:100px;">
+        </div>
+
+        <div class="border-top pt-4" style="border-color: var(--admin-border) !important;">
+          <button type="submit" class="btn px-4" style="background:var(--admin-accent); color:#120609; font-weight:600;">Update Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

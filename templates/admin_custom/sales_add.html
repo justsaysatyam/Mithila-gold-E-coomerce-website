@@ -1,0 +1,256 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block title %}New Walk-in Sale — Admin{% endblock %}
+{% block page_heading %}New Walk-in Sale{% endblock %}
+
+{% block content %}
+<div class="adm-page-header">
+  <div>
+    <h1>🧾 New Walk-in Sale</h1>
+    <p>Create a manual billing record for a walk-in customer.</p>
+  </div>
+  <a href="{% url 'store:admin_sales_list' %}" class="adm-btn adm-btn-ghost">
+    <i class="bi bi-arrow-left"></i> Sales Records
+  </a>
+</div>
+
+<form method="post" id="salesForm">
+{% csrf_token %}
+
+<div class="row g-4">
+  <!-- Left: Customer + Settings -->
+  <div class="col-lg-4">
+    <div class="adm-card mb-3">
+      <div class="adm-card-header"><span>👤 Customer Details</span></div>
+      <div class="adm-card-body">
+        <div class="adm-form-group">
+          <label>Customer Name *</label>
+          <input type="text" name="customer_name" class="adm-input" placeholder="Full name" required list="farmerList">
+          <datalist id="farmerList">{% for p in products %}<option value="{{ p.name }}">{% endfor %}</datalist>
+        </div>
+        <div class="adm-form-group">
+          <label>Phone Number</label>
+          <input type="text" name="customer_phone" class="adm-input" placeholder="10-digit mobile">
+        </div>
+        <div class="adm-form-group">
+          <label>Address / Village</label>
+          <textarea name="customer_address" class="adm-textarea" placeholder="Village, block, district" style="min-height:65px"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-card mb-3">
+      <div class="adm-card-header"><span>⚙️ Sale Settings</span></div>
+      <div class="adm-card-body">
+        <div class="adm-form-group">
+          <label>Payment Mode</label>
+          <select name="payment_mode" class="adm-select">
+            {% for value, label in payment_choices %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="adm-form-group">
+          <label>Sale Date (Calendar)</label>
+          <input type="date" name="date" class="adm-input" value="{{ today|date:'Y-m-d' }}">
+        </div>
+        <div class="adm-form-group">
+          <label>GST Rate (%)</label>
+          <select name="gst_rate" class="adm-select" id="gstRate" onchange="recalculate()">
+            <option value="0">No GST (0%)</option>
+            <option value="5">5%</option>
+            <option value="12">12%</option>
+            <option value="18">18%</option>
+          </select>
+        </div>
+        <div class="adm-form-group">
+          <label>Notes / Remarks</label>
+          <textarea name="notes" class="adm-textarea" placeholder="Optional notes…" style="min-height:55px"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Items -->
+  <div class="col-lg-8">
+    <div class="adm-card mb-3">
+      <div class="adm-card-header">
+        <span><i class="bi bi-list-ul" style="color:var(--admin-accent)"></i> &nbsp;Sale Items</span>
+        <button type="button" class="adm-btn adm-btn-primary adm-btn-sm" onclick="addItem()">
+          <i class="bi bi-plus-lg"></i> Add Row
+        </button>
+      </div>
+      <div class="adm-card-body" style="padding:0">
+        <div style="overflow-x:auto">
+          <table class="adm-table" id="itemsTable">
+            <thead>
+              <tr>
+                <th style="min-width:200px">Product</th>
+                <th style="min-width:80px">Qty</th>
+                <th style="min-width:110px">Unit Price (₹)</th>
+                <th style="min-width:110px;text-align:right">Total</th>
+                <th style="width:50px"></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody">
+              <tr id="row-0">
+                <td>
+                  <input type="text" name="product_name[]" class="adm-input" placeholder="Product name" list="productNames" required>
+                </td>
+                <td>
+                  <input type="number" name="quantity[]" class="adm-input qty-input" value="1" min="1" onchange="recalculate()">
+                </td>
+                <td>
+                  <input type="number" name="unit_price[]" class="adm-input price-input" value="0" min="0" step="0.01" onchange="recalculate()">
+                </td>
+                <td style="text-align:right;font-weight:700" class="row-total">₹0.00</td>
+                <td>
+                  <button type="button" class="adm-btn adm-btn-danger adm-btn-sm" onclick="removeRow('row-0')" style="padding:.25rem .5rem">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Totals summary -->
+        <div style="padding:1rem 1.25rem;border-top:1px solid var(--admin-border)">
+          <div style="max-width:240px;margin-left:auto;font-size:.875rem">
+            <div style="display:flex;justify-content:space-between;margin-bottom:.4rem">
+              <span style="color:var(--admin-muted)">Subtotal</span>
+              <span id="displaySubtotal" style="font-weight:600">₹0.00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:.4rem">
+              <span style="color:var(--admin-muted)">GST</span>
+              <span id="displayGst">₹0.00</span>
+            </div>
+            <div style="height:1px;background:var(--admin-border);margin:.6rem 0"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-weight:700;font-size:.95rem">Grand Total</span>
+              <span id="displayGrandTotal" style="font-size:1.3rem;font-weight:800;color:#3fb950">₹0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick product picker -->
+    <div class="adm-card">
+      <div class="adm-card-header"><span>⚡ Quick Select from Catalog</span></div>
+      <div class="adm-card-body">
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+          {% for product in products %}
+          <button type="button" onclick="quickAdd('{{ product.name|escapejs }}', {{ product.price }})"
+                  style="background:var(--admin-sidebar-hover);border:1px solid var(--admin-border);padding:.3rem .7rem;border-radius:6px;color:var(--admin-text);font-size:.78rem;cursor:pointer;transition:.15s" 
+                  onmouseover="this.style.borderColor='var(--admin-accent)'" onmouseout="this.style.borderColor='var(--admin-border)'">
+            {{ product.name }} — ₹{{ product.price }}
+          </button>
+          {% empty %}
+          <span style="color:var(--admin-muted);font-size:.85rem">No active products in catalog.</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<datalist id="productNames">
+  {% for product in products %}
+  <option value="{{ product.name }}" data-price="{{ product.price }}">₹{{ product.price }}</option>
+  {% endfor %}
+</datalist>
+
+<!-- Submit bar -->
+<div style="margin-top:1.5rem;padding:1.25rem;background:var(--admin-card);border:1px solid var(--admin-border);border-radius:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+  <div style="font-size:.85rem;color:var(--admin-muted)">
+    Review the items carefully before submitting.
+  </div>
+  <div style="display:flex;gap:.75rem">
+    <a href="{% url 'store:admin_sales_list' %}" class="adm-btn adm-btn-ghost">Cancel</a>
+    <button type="submit" class="adm-btn adm-btn-primary" style="padding:.55rem 2rem;font-size:.95rem">
+      <i class="bi bi-check-lg"></i> Record Sale
+    </button>
+  </div>
+</div>
+
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let rowCount = 1;
+
+function addItem() {
+  const body = document.getElementById('itemsBody');
+  const id = 'row-' + rowCount++;
+  const tr = document.createElement('tr');
+  tr.id = id;
+  tr.innerHTML = `
+    <td><input type="text" name="product_name[]" class="adm-input" placeholder="Product name" list="productNames"></td>
+    <td><input type="number" name="quantity[]" class="adm-input qty-input" value="1" min="1" onchange="recalculate()"></td>
+    <td><input type="number" name="unit_price[]" class="adm-input price-input" value="0" min="0" step="0.01" onchange="recalculate()"></td>
+    <td style="text-align:right;font-weight:700" class="row-total">₹0.00</td>
+    <td><button type="button" class="adm-btn adm-btn-danger adm-btn-sm" onclick="removeRow('${id}')" style="padding:.25rem .5rem"><i class="bi bi-x-lg"></i></button></td>`;
+  body.appendChild(tr);
+  recalculate();
+}
+
+function removeRow(id) {
+  const rows = document.querySelectorAll('#itemsBody tr');
+  if (rows.length <= 1) { alert('At least one item is required.'); return; }
+  document.getElementById(id)?.remove();
+  recalculate();
+}
+
+function quickAdd(name, price) {
+  // Try to fill an empty row first
+  const rows = document.querySelectorAll('#itemsBody tr');
+  for (let row of rows) {
+    const nameInput = row.querySelector('[name="product_name[]"]');
+    if (nameInput && nameInput.value === '') {
+      nameInput.value = name;
+      row.querySelector('[name="unit_price[]"]').value = price;
+      recalculate();
+      return;
+    }
+  }
+  addItem();
+  const lastRow = document.querySelectorAll('#itemsBody tr');
+  const last = lastRow[lastRow.length - 1];
+  last.querySelector('[name="product_name[]"]').value = name;
+  last.querySelector('[name="unit_price[]"]').value = price;
+  recalculate();
+}
+
+function recalculate() {
+  const rows = document.querySelectorAll('#itemsBody tr');
+  let subtotal = 0;
+  rows.forEach(row => {
+    const qty = parseFloat(row.querySelector('.qty-input')?.value || 0);
+    const price = parseFloat(row.querySelector('.price-input')?.value || 0);
+    const total = qty * price;
+    subtotal += total;
+    const totalCell = row.querySelector('.row-total');
+    if (totalCell) totalCell.textContent = '₹' + total.toFixed(2);
+  });
+  const gstRate = parseFloat(document.getElementById('gstRate').value || 0) / 100;
+  const gst = subtotal * gstRate;
+  const grand = subtotal + gst;
+  document.getElementById('displaySubtotal').textContent = '₹' + subtotal.toFixed(2);
+  document.getElementById('displayGst').textContent = '₹' + gst.toFixed(2);
+  document.getElementById('displayGrandTotal').textContent = '₹' + grand.toFixed(2);
+}
+
+// Auto-fill price on product name selection
+document.addEventListener('input', e => {
+  if (e.target.name === 'product_name[]') {
+    const list = document.getElementById('productNames');
+    const opt = Array.from(list.options).find(o => o.value === e.target.value);
+    if (opt) {
+      const row = e.target.closest('tr');
+      const priceInput = row?.querySelector('.price-input');
+      if (priceInput) { priceInput.value = opt.dataset.price; recalculate(); }
+    }
+  }
+});
+</script>
+{% endblock %}

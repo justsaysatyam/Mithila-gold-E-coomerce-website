@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Page Header -->
+  <div class="section-header text-center mb-5">
+    <h1 class="fw-bold">Contact <span class="text-gradient">Us</span></h1>
+    <p class="section-subtitle">We're here to help your farm thrive</p>
+  </div>
+
+  <div class="row g-4 align-items-start">
+    <!-- Contact Details -->
+    <div class="col-lg-5">
+      <div class="contact-info-card">
+        <h5 class="fw-bold text-farm-green mb-4">📍 Our Location</h5>
+
+        <div class="contact-detail-item">
+          <div class="contact-detail-icon">🏪</div>
+          <div>
+            <div class="fw-bold">{{ settings.company_name }}</div>
+            <div class="text-muted">{{ settings.address }}</div>
+            <div class="text-muted small">{{ settings.landmark }}</div>
+          </div>
+        </div>
+
+        <div class="contact-detail-item">
+          <div class="contact-detail-icon">📞</div>
+          <div>
+            <div class="fw-bold">Contact Numbers</div>
+            <a href="tel:{{ settings.phone_primary }}" class="d-block text-warning fw-bold">
+              Satyan Jha: {{ settings.phone_primary }}
+            </a>
+            {% if settings.phone_secondary %}
+            <a href="tel:{{ settings.phone_secondary }}" class="d-block text-warning fw-bold">
+              Alt Phone: {{ settings.phone_secondary }}
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if settings.email %}
+        <div class="contact-detail-item">
+          <div class="contact-detail-icon">📧</div>
+          <div>
+            <div class="fw-bold">Email</div>
+            <a href="mailto:{{ settings.email }}" class="text-warning">{{ settings.email }}</a>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="contact-detail-item">
+          <div class="contact-detail-icon">🧾</div>
+          <div>
+            <div class="fw-bold">GST Number</div>
+            <div class="font-monospace text-muted">{{ settings.gst_number }}</div>
+          </div>
+        </div>
+
+        <div class="contact-detail-item">
+          <div class="contact-detail-icon">⏰</div>
+          <div>
+            <div class="fw-bold">Business Hours</div>
+            <div class="text-muted">Mon – Sat: 8:00 AM – 7:00 PM</div>
+            <div class="text-muted">Sunday: 9:00 AM – 2:00 PM</div>
+          </div>
+        </div>
+
+        <!-- Quick Call Buttons -->
+        <div class="d-flex gap-2 mt-4">
+          <a href="tel:{{ settings.phone_primary }}" class="btn btn-farm-primary flex-fill">
+            <i class="bi bi-telephone"></i> Call Satyan
+          </a>
+          {% if settings.phone_secondary %}
+          <a href="tel:{{ settings.phone_secondary }}" class="btn btn-outline-warning flex-fill">
+            <i class="bi bi-telephone"></i> Call Alt
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="col-lg-7">
+      <div class="map-wrapper">
+        <h5 class="fw-bold text-farm-green mb-3">🗺️ Find Us on Map</h5>
+        <div class="map-embed rounded overflow-hidden shadow">
+          <iframe
+            src="{{ settings.maps_embed_url }}"
+            width="100%"
+            height="400"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+        <div class="mt-3 p-3 bg-light-farm rounded">
+          <p class="mb-0 small">
+            <i class="bi bi-signpost-fill text-warning me-2"></i>
+            <strong>Landmark:</strong> {{ settings.landmark }}, {{ settings.address }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

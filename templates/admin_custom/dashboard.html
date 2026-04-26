@@ -1,0 +1,140 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block title %}Dashboard — Admin{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="adm-page-header">
+  <div>
+    <h1>Welcome back, {{ user.first_name|default:user.username }} 👋</h1>
+    <p>Here's what's happening at Mithila Gold today.</p>
+  </div>
+  <a href="{% url 'store:admin_sales_add' %}" class="adm-btn adm-btn-primary">
+    <i class="bi bi-plus-lg"></i> New Walk-in Sale
+  </a>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="adm-stat">
+      <div class="stat-icon" style="background:rgba(245,158,11,.15)">💰</div>
+      <div class="stat-value">₹{{ total_revenue|floatformat:0 }}</div>
+      <div class="stat-label">Total Revenue</div>
+      <div class="stat-bg">₹</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="adm-stat">
+      <div class="stat-icon" style="background:rgba(88,166,255,.15)">🛒</div>
+      <div class="stat-value">{{ total_orders }}</div>
+      <div class="stat-label">Online Orders</div>
+      <div class="stat-bg"><i class="bi bi-cart3"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="adm-stat">
+      <div class="stat-icon" style="background:rgba(63,185,80,.15)">🏪</div>
+      <div class="stat-value">{{ total_walkins }}</div>
+      <div class="stat-label">Walk-in Sales</div>
+      <div class="stat-bg"><i class="bi bi-shop"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="adm-stat">
+      <div class="stat-icon" style="background:rgba(188,140,255,.15)">👨‍🌾</div>
+      <div class="stat-value">{{ total_farmers }}</div>
+      <div class="stat-label">Registered Farmers</div>
+      <div class="stat-bg"><i class="bi bi-people"></i></div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <a href="{% url 'store:admin_products_list' %}" class="adm-action-tile">
+      <div class="tile-icon">📦</div>
+      <h6>Products</h6>
+      <p>Manage catalog</p>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{% url 'store:admin_orders_list' %}" class="adm-action-tile">
+      <div class="tile-icon">🛒</div>
+      <h6>Orders</h6>
+      <p>View & update</p>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{% url 'store:admin_sales_add' %}" class="adm-action-tile">
+      <div class="tile-icon">➕</div>
+      <h6>New Sale</h6>
+      <p>Walk-in billing</p>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="{% url 'store:admin_settings' %}" class="adm-action-tile">
+      <div class="tile-icon">⚙️</div>
+      <h6>Settings</h6>
+      <p>Site config</p>
+    </a>
+  </div>
+</div>
+
+<!-- Recent Orders Table -->
+<div class="adm-card">
+  <div class="adm-card-header">
+    <span><i class="bi bi-clock-history" style="color:var(--admin-accent)"></i> &nbsp;Recent Online Orders</span>
+    <a href="{% url 'store:admin_orders_list' %}" class="adm-btn adm-btn-ghost adm-btn-sm">View All <i class="bi bi-arrow-right"></i></a>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="adm-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in recent_orders %}
+        <tr>
+          <td><span style="color:var(--admin-muted)">#{{ order.pk }}</span></td>
+          <td>
+            <div style="font-weight:600">{{ order.customer_name }}</div>
+            <div style="font-size:.75rem;color:var(--admin-muted)">{{ order.customer_phone }}</div>
+          </td>
+          <td style="color:var(--admin-muted);font-size:.8rem">{{ order.created_at|date:"d M Y, h:i A" }}</td>
+          <td>
+            {% if order.status == 'pending' %}<span class="adm-badge amber">⏳ Pending</span>
+            {% elif order.status == 'processing' %}<span class="adm-badge blue">⚙️ Processing</span>
+            {% elif order.status == 'shipped' %}<span class="adm-badge purple">🚚 Shipped</span>
+            {% elif order.status == 'delivered' %}<span class="adm-badge green">✅ Delivered</span>
+            {% elif order.status == 'cancelled' %}<span class="adm-badge red">❌ Cancelled</span>
+            {% else %}<span class="adm-badge grey">{{ order.get_status_display }}</span>{% endif %}
+          </td>
+          <td style="font-weight:700;color:#3fb950">₹{{ order.total_amount }}</td>
+          <td>
+            <a href="{% url 'store:admin_order_detail' order.pk %}" class="adm-btn adm-btn-ghost adm-btn-sm">
+              <i class="bi bi-eye"></i> Manage
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">
+          <div class="adm-empty">
+            <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+            <h5>No orders yet</h5>
+            <p>Online orders will appear here.</p>
+          </div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

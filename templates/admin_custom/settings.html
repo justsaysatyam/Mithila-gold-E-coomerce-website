@@ -1,0 +1,81 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Site Settings — Admin{% endblock %}
+{% block page_heading %}Site Settings{% endblock %}
+
+{% block content %}
+<div class="adm-page-header">
+  <div>
+    <h1>⚙️ Site Settings</h1>
+    <p>Configure company information displayed on the website and PDF receipts.</p>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="adm-card">
+      <div class="adm-card-header">
+        <span><i class="bi bi-building" style="color:var(--admin-accent)"></i> &nbsp;Company Information</span>
+      </div>
+      <div class="adm-card-body">
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="adm-form-group">
+            <label>Company Name</label>
+            <input type="text" name="company_name" class="adm-input" value="{{ form.company_name.value|default:'' }}" placeholder="Mithila Gold">
+          </div>
+
+          <div class="adm-form-group">
+            <label>Tagline</label>
+            <textarea name="tagline" class="adm-textarea" style="min-height:60px" placeholder="भरोसा आपका, क्वालिटी हमारी…">{{ form.tagline.value|default:'' }}</textarea>
+          </div>
+
+          <div class="adm-form-group">
+            <label>GST Number</label>
+            <input type="text" name="gst_number" class="adm-input" value="{{ form.gst_number.value|default:'' }}" placeholder="10AAQFJ2396C1ZJ">
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-12">
+              <div class="adm-form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" class="adm-input" value="{{ form.email.value|default:'' }}" placeholder="info@jaybnpoultry.com">
+              </div>
+            </div>
+              <div class="col-md-6 mb-3">
+                <label>Phone Primary (Satyan)*</label>
+                <input type="text" name="phone_primary" class="adm-input" value="{{ form.phone_primary.value|default:'' }}" required placeholder="6202822415">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label>Phone Secondary</label>
+                <input type="text" name="phone_secondary" class="adm-input" value="{{ form.phone_secondary.value|default:'' }}" placeholder="">
+              </div>
+            </div>
+
+          <div class="adm-form-group">
+            <label>Address</label>
+            <textarea name="address" class="adm-textarea" style="min-height:70px" placeholder="Belhwar, Madhubani, Bihar">{{ form.address.value|default:'' }}</textarea>
+          </div>
+
+          <div class="adm-form-group">
+            <label>Landmark</label>
+            <input type="text" name="landmark" class="adm-input" value="{{ form.landmark.value|default:'' }}" placeholder="Near Belhwar Durga Mandir">
+          </div>
+
+          <div class="adm-form-group">
+            <label>Google Maps Embed URL</label>
+            <input type="url" name="maps_embed_url" class="adm-input" value="{{ form.maps_embed_url.value|default:'' }}" placeholder="https://maps.google.com/maps?q=…">
+            <div class="adm-form-hint">Paste the embed URL from Google Maps → Share → Embed a map.</div>
+          </div>
+
+          <div class="adm-divider"></div>
+          <button type="submit" class="adm-btn adm-btn-primary" style="padding:.55rem 2rem">
+            <i class="bi bi-check-lg"></i> Save Settings
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

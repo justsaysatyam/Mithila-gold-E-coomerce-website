@@ -1,0 +1,114 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block title %}Walk-in Sales — Admin{% endblock %}
+{% block page_heading %}Walk-in Sales{% endblock %}
+
+{% block content %}
+<div class="adm-page-header">
+  <div>
+    <h1>🏪 Walk-in Sales</h1>
+    <p>Total Revenue: <strong style="color:var(--admin-accent)">₹{{ total_revenue|floatformat:2 }}</strong></p>
+  </div>
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+    <a href="{% url 'store:admin_sales_add' %}" class="adm-btn adm-btn-primary">
+      <i class="bi bi-plus-lg"></i> New Sale
+    </a>
+    <a href="?export=csv{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}{% if request.GET.payment %}&payment={{ request.GET.payment }}{% endif %}"
+       class="adm-btn adm-btn-success">
+      <i class="bi bi-download"></i> Export CSV
+    </a>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="adm-card mb-4">
+  <div class="adm-card-body" style="padding:.9rem 1.25rem">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-sm-6 col-md-3">
+        <label style="font-size:.75rem;font-weight:600;color:var(--admin-muted);text-transform:uppercase;letter-spacing:.04em">From Date</label>
+        <input type="date" name="date_from" value="{{ request.GET.date_from }}" class="adm-input">
+      </div>
+      <div class="col-sm-6 col-md-3">
+        <label style="font-size:.75rem;font-weight:600;color:var(--admin-muted);text-transform:uppercase;letter-spacing:.04em">To Date</label>
+        <input type="date" name="date_to" value="{{ request.GET.date_to }}" class="adm-input">
+      </div>
+      <div class="col-sm-6 col-md-3">
+        <label style="font-size:.75rem;font-weight:600;color:var(--admin-muted);text-transform:uppercase;letter-spacing:.04em">Payment Mode</label>
+        <select name="payment" class="adm-select">
+          <option value="">All Modes</option>
+          {% for value, label in payment_choices %}
+            <option value="{{ value }}" {% if request.GET.payment == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-sm-6 col-md-3">
+        <button type="submit" class="adm-btn adm-btn-primary" style="width:100%">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Sales Table -->
+<div class="adm-card">
+  <div class="adm-card-header">
+    <span><i class="bi bi-shop" style="color:var(--admin-accent)"></i> &nbsp;{{ sales|length }} Sale{{ sales|length|pluralize }}</span>
+  </div>
+  <div style="overflow-x:auto">
+    {% if sales %}
+    <table class="adm-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Customer</th>
+          <th>Phone</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Payment</th>
+          <th>Date</th>
+          <th>Receipt</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in sales %}
+        <tr>
+          <td style="color:var(--admin-muted)">#{{ record.pk }}</td>
+          <td style="font-weight:600">{{ record.customer_name }}</td>
+          <td style="color:var(--admin-muted);font-size:.82rem">{{ record.customer_phone }}</td>
+          <td style="max-width:200px">
+            <div style="font-size:.78rem;color:var(--admin-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              {% for item in record.items.all %}
+                {{ item.product_name }} ×{{ item.quantity }}{% if not forloop.last %}, {% endif %}
+              {% empty %}— No items{% endfor %}
+            </div>
+          </td>
+          <td style="font-weight:700;color:#f59e0b">₹{{ record.total_amount }}</td>
+          <td>
+            {% if record.payment_mode == 'Cash' %}<span class="adm-badge green">💵 Cash</span>
+            {% elif record.payment_mode == 'UPI' %}<span class="adm-badge blue">📱 UPI</span>
+            {% else %}<span class="adm-badge purple">🏦 Bank</span>
+            {% endif %}
+          </td>
+          <td style="font-size:.82rem;color:var(--admin-muted)">{{ record.date|date:"d M Y" }}</td>
+          <td>
+            <a href="{% url 'store:sales_receipt_pdf' record.pk %}" class="adm-btn adm-btn-ghost adm-btn-sm" target="_blank">
+              <i class="bi bi-file-pdf"></i> PDF
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="adm-empty">
+      <div class="empty-icon">🏪</div>
+      <h5>No sales records found</h5>
+      <p>Record your first walk-in sale to get started.</p>
+      <a href="{% url 'store:admin_sales_add' %}" class="adm-btn adm-btn-primary">
+        <i class="bi bi-plus-lg"></i> Add Sale
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}Admin | Mithila Gold{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}" style="display: flex; align-items: center; gap: 10px;">
+        <img src="{% static 'img/logo.png' %}" alt="Mithila Gold Logo" style="height: 48px; border-radius: 50%; background: #7A0C2E; object-fit: contain; border: 2px solid #C9962A;">
+        Mithila Gold Admin
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<!-- Keep standard header or inject custom navigation if needed -->
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Custom UI matching Mithila Gold */
+    :root {
+        --primary-color: #7A0C2E;    /* Deep Crimson */
+        --secondary-color: #C9962A;  /* Royal Gold */
+        --accent-color: #A67A1E;     
+        --bg-light: #FDF6E3;         /* Ivory */
+        --text-color: #1A0508;
+        --border-color: #e8d5b0;
+    }
+
+    body {
+        background-color: var(--bg-light);
+        color: var(--text-color);
+        font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    #header {
+        background: linear-gradient(135deg, #120609 0%, #3D0617 60%, #7A0C2E 100%) !important;
+        color: white;
+        border-bottom: 4px solid #C9962A;
+        padding: 10px 40px;
+    }
+
+    #header a:link, #header a:visited {
+        color: white;
+    }
+
+    #header a:hover {
+        color: var(--secondary-color);
+    }
+    
+    #branding h1 {
+        margin: 0;
+        color: var(--secondary-color);
+        font-weight: 700;
+        font-size: 24px;
+    }
+
+    div.breadcrumbs {
+        background: #3D0617;
+        color: #FDF6E3;
+        padding: 10px 40px;
+    }
+
+    div.breadcrumbs a {
+        color: #e1f0e8;
+    }
+    
+    div.breadcrumbs a:hover {
+        color: var(--secondary-color);
+    }
+
+    a:link, a:visited {
+        color: var(--primary-color);
+    }
+
+    a:hover {
+        color: var(--secondary-color);
+    }
+
+    .module h2, .module caption, .inline-group h2 {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        background: var(--primary-color);
+        border: none;
+        border-radius: 6px;
+        padding: 10px 20px;
+        color: white;
+        text-transform: uppercase;
+        font-weight: 600;
+        transition: background 0.2s ease-in-out;
+    }
+
+    .button:hover, input[type=submit]:hover, input[type=button]:hover, a.button:hover {
+        background: var(--secondary-color);
+        cursor: pointer;
+    }
+    
+    .button.default, input[type=submit].default, .submit-row input.default {
+        background: var(--secondary-color);
+    }
+
+    .button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover {
+        background: var(--accent-color);
+    }
+
+    /* Override selection highlight */
+    tr.selected td, tr.selected th {
+        background-color: #e1f0e8 !important;
+    }
+    
+    /* Login panel overrides */
+    .login #header {
+        justify-content: center;
+        border-radius: 8px 8px 0 0;
+        padding: 20px;
+    }
+    .login #content {
+        margin-top: 50px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        padding: 30px;
+    }
+</style>
+{% endblock %}

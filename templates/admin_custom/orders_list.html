@@ -1,0 +1,95 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block title %}Online Orders — Admin{% endblock %}
+{% block page_heading %}Online Orders{% endblock %}
+
+{% block content %}
+<div class="adm-page-header">
+  <div>
+    <h1>🛒 Online Orders</h1>
+    <p>View and manage all customer online orders.</p>
+  </div>
+</div>
+
+<!-- Filter -->
+<div class="adm-card mb-4">
+  <div class="adm-card-body" style="padding:.9rem 1.25rem">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-sm-5 col-md-4">
+        <label style="font-size:.75rem;font-weight:600;color:var(--admin-muted);text-transform:uppercase;letter-spacing:.04em">Filter by Status</label>
+        <select name="status" class="adm-select">
+          <option value="">All Orders</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-sm-3 col-md-2">
+        <button type="submit" class="adm-btn adm-btn-primary" style="width:100%">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+      </div>
+      {% if current_status %}
+      <div class="col-sm-3 col-md-2">
+        <a href="{% url 'store:admin_orders_list' %}" class="adm-btn adm-btn-ghost" style="width:100%">
+          <i class="bi bi-x"></i> Clear
+        </a>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<!-- Orders Table -->
+<div class="adm-card">
+  <div class="adm-card-header">
+    <span><i class="bi bi-cart-check" style="color:var(--admin-accent)"></i> &nbsp;{{ orders|length }} Order{{ orders|length|pluralize }}</span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="adm-table">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>Date</th>
+          <th>Customer</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td><span style="font-weight:700;color:var(--admin-accent)">#{{ order.pk }}</span></td>
+          <td style="font-size:.8rem;color:var(--admin-muted)">{{ order.created_at|date:"d M Y" }}<br><span style="font-size:.72rem">{{ order.created_at|date:"h:i A" }}</span></td>
+          <td style="font-weight:600">{{ order.customer_name }}</td>
+          <td style="color:var(--admin-muted);font-size:.82rem">{{ order.customer_phone }}</td>
+          <td>
+            {% if order.status == 'pending' %}<span class="adm-badge amber">⏳ Pending</span>
+            {% elif order.status == 'processing' %}<span class="adm-badge blue">⚙️ Processing</span>
+            {% elif order.status == 'shipped' %}<span class="adm-badge purple">🚚 Shipped</span>
+            {% elif order.status == 'delivered' %}<span class="adm-badge green">✅ Delivered</span>
+            {% elif order.status == 'cancelled' %}<span class="adm-badge red">❌ Cancelled</span>
+            {% else %}<span class="adm-badge grey">{{ order.get_status_display }}</span>{% endif %}
+          </td>
+          <td style="font-weight:700;color:#3fb950">₹{{ order.total_amount }}</td>
+          <td>
+            <a href="{% url 'store:admin_order_detail' order.pk %}" class="adm-btn adm-btn-ghost adm-btn-sm">
+              <i class="bi bi-eye"></i> Manage
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">
+          <div class="adm-empty">
+            <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+            <h5>No orders found</h5>
+            <p>{% if current_status %}No orders with status "{{ current_status }}".{% else %}Online orders will appear here when customers place them.{% endif %}</p>
+          </div>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block title %}Manage Categories{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="h4 mb-0 fw-bold">Manage Categories</h2>
+  <a href="{% url 'store:admin_categories_add' %}" class="btn px-4" style="background:var(--admin-accent); color:#120609; font-weight:600; border-radius:8px;">
+    + Add Category
+  </a>
+</div>
+
+<div class="adm-card p-0 overflow-hidden">
+  <div class="table-responsive">
+    <table class="table text-light mb-0 adm-table">
+      <thead style="background: #2a0f16;">
+        <tr>
+          <th class="py-3 px-4 border-bottom-0">Icon</th>
+          <th class="py-3 px-4 border-bottom-0">Name</th>
+          <th class="py-3 px-4 border-bottom-0">Slug</th>
+          <th class="py-3 px-4 border-bottom-0 text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in categories %}
+        <tr class="align-middle border-bottom border-secondary" style="border-color: var(--admin-border) !important;">
+          <td class="px-4 py-3 fs-4">{{ cat.icon }}</td>
+          <td class="px-4 py-3 fw-bold">{{ cat.name }}<br><small class="text-muted fw-normal">{{ cat.description }}</small></td>
+          <td class="px-4 py-3 text-muted">{{ cat.slug }}</td>
+          <td class="px-4 py-3 text-end">
+            <a href="{% url 'store:admin_categories_edit' cat.pk %}" class="btn btn-sm btn-outline-warning me-2" style="border-color:#C9962A; color:#C9962A;">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteCatModal{{ cat.pk }}">Delete</button>
+
+            <!-- Delete Modal -->
+            <div class="modal fade" id="deleteCatModal{{ cat.pk }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="background: var(--admin-card); border: 1px solid var(--admin-border);">
+                  <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title">Delete Category</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                  </div>
+                  <div class="modal-body text-start">
+                    <p>Are you sure you want to delete <strong>{{ cat.name }}</strong>?</p>
+                    <p class="text-danger small"><i class="bi bi-exclamation-triangle"></i> Warning: Products assigned to this category will have their category set to null.</p>
+                  </div>
+                  <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{% url 'store:admin_categories_delete' cat.pk %}" method="post">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center py-5 text-muted">No categories found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

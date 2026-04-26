@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="fw-bold mb-4">My <span class="text-gradient">Cart</span></h1>
+
+  {% if cart_items %}
+  <div class="row g-4">
+    <!-- Cart Items -->
+    <div class="col-lg-8">
+      <div class="cart-items-wrapper">
+        {% for item in cart_items %}
+        <div class="cart-item-row">
+          <div class="d-flex align-items-center gap-3">
+            <!-- Product Image -->
+            <div class="cart-item-img-wrapper">
+              {% if item.product.image %}
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-item-img">
+              {% else %}
+                <div class="cart-item-placeholder">{{ item.product.category.icon|default:"🛒" }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Info -->
+            <div class="flex-grow-1">
+              <h6 class="mb-1 fw-bold">
+                <a href="{% url 'store:product_detail' item.product.pk %}" class="text-dark text-decoration-none">
+                  {{ item.product.name }}
+                </a>
+              </h6>
+              <small class="text-muted">{{ item.product.category }}</small>
+              <div class="fw-bold text-warning mt-1">₹{{ item.product.price }} each</div>
+            </div>
+
+            <!-- Quantity & Remove -->
+            <div class="d-flex flex-column align-items-end gap-2">
+              <div class="fw-bold text-farm-green fs-5">₹{{ item.total }}</div>
+              <form action="{% url 'store:update_cart' item.product.pk %}" method="post" class="d-flex gap-1 align-items-center">
+                {% csrf_token %}
+                <div class="input-group input-group-sm" style="width:100px;">
+                  <button type="button" class="btn btn-outline-secondary" onclick="this.form.quantity.value=Math.max(0, parseInt(this.form.quantity.value)-1)">−</button>
+                  <input type="number" name="quantity" value="{{ item.quantity }}" min="0" max="{{ item.product.stock }}" class="form-control text-center">
+                  <button type="button" class="btn btn-outline-secondary" onclick="this.form.quantity.value=Math.min({{ item.product.stock }}, parseInt(this.form.quantity.value)+1)">+</button>
+                </div>
+                <button type="submit" class="btn btn-outline-primary btn-sm"><i class="bi bi-arrow-repeat"></i></button>
+              </form>
+              <form action="{% url 'store:remove_from_cart' item.product.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-trash3"></i> Remove
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'store:product_list' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left"></i> Continue Shopping
+        </a>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="col-lg-4">
+      <div class="order-summary-card sticky-top" style="top: 80px;">
+        <h5 class="fw-bold mb-4">Order Summary</h5>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Subtotal</span>
+          <span class="fw-bold">₹{{ grand_total }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">GST (5%)</span>
+          <span class="fw-bold">₹{{ gst }}</span>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between mb-4">
+          <span class="fw-bold fs-5">Grand Total</span>
+          <span class="fw-bold fs-5 text-warning">₹{{ total_with_gst }}</span>
+        </div>
+
+        {% if user.is_authenticated %}
+          <a href="{% url 'store:checkout' %}" class="btn btn-farm-primary w-100 btn-lg fw-bold">
+            <i class="bi bi-bag-check me-2"></i>Proceed to Checkout
+          </a>
+        {% else %}
+          <a href="{% url 'store:login' %}?next={% url 'store:checkout' %}" class="btn btn-farm-primary w-100 btn-lg fw-bold">
+            <i class="bi bi-person me-2"></i>Login to Checkout
+          </a>
+          <a href="{% url 'store:register' %}" class="btn btn-outline-success w-100 mt-2">
+            <i class="bi bi-person-plus me-2"></i>Register Now
+          </a>
+        {% endif %}
+
+        <div class="mt-3 text-center">
+          <small class="text-muted">
+            <i class="bi bi-shield-check text-success me-1"></i>Safe & Secure Orders
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="empty-state text-center py-5">
+    <div class="empty-icon">🛒</div>
+    <h4 class="mt-3">Your cart is empty</h4>
+    <p class="text-muted">Start shopping — add some products to get going!</p>
+    <a href="{% url 'store:product_list' %}" class="btn btn-farm-primary btn-lg px-5">Browse Products</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

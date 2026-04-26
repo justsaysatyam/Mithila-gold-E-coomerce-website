@@ -1,0 +1,29 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block title %}Access Denied — Admin{% endblock %}
+{% block page_heading %}Access Denied{% endblock %}
+
+{% block content %}
+<div class="adm-card" style="max-width: 600px; margin: 4rem auto; text-align: center;">
+  <div class="adm-card-body" style="padding: 3rem 2rem;">
+    <div style="font-size: 4rem; color: var(--admin-red); margin-bottom: 1.5rem;">
+      <i class="bi bi-shield-lock"></i>
+    </div>
+    <h2 style="font-weight: 800; margin-bottom: 1rem;">Restricted Access</h2>
+    <p style="color: var(--admin-muted); margin-bottom: 2rem;">
+      Sorry, you do not have permission to access the administrative dashboard. 
+      Only staff members and administrators can view this section.
+    </p>
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+      <a href="{% url 'store:home' %}" class="adm-btn adm-btn-primary">
+        <i class="bi bi-house"></i> Return Home
+      </a>
+      <form action="{% url 'store:logout' %}" method="post" style="margin:0">
+        {% csrf_token %}
+        <button type="submit" class="adm-btn adm-btn-ghost">
+          <i class="bi bi-box-arrow-right"></i> Log out
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

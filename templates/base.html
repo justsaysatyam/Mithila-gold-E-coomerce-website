@@ -1,0 +1,251 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ page_title|default:"Mithila Gold" }} — Mithila Gold | The Essence of Tradition in Every Crunch{% endblock %}</title>
+  <meta name="description"
+    content="{% block meta_description %}Mithila Gold — Premium makhana (fox nuts) from the heart of Mithila, Bihar. The Essence of Tradition in Every Crunch.{% endblock %}">
+
+  <!-- Google Fonts: Cinzel (headings) + Playfair Display + Hind (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Hind:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+  <!-- ════════════════════ NAVBAR ════════════════════ -->
+  <nav class="navbar navbar-expand-lg navbar-farm sticky-top">
+    <div class="container">
+      <!-- Brand -->
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'store:home' %}">
+        <img src="{% static 'img/logo.png' %}" alt="Mithila Gold Logo" class="nav-logo"
+          onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';"><span
+          style="display:none;width:52px;height:52px;background:#7A0C2E;border-radius:50%;align-items:center;justify-content:center;font-size:1.6rem;border:2px solid #C9962A;">🪷</span>
+        <div class="d-none d-md-block">
+          <div class="brand-name">Mithila Gold</div>
+          <div class="brand-tagline">The Essence of Tradition in Every Crunch</div>
+        </div>
+      </a>
+
+      <!-- Mobile Cart Badge -->
+      <div class="d-flex d-lg-none align-items-center gap-2 me-2">
+        <a href="{% url 'store:cart' %}" class="btn btn-outline-warning btn-sm position-relative">
+          <i class="bi bi-cart3"></i>
+          {% if cart_count > 0 %}
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ cart_count
+            }}</span>
+          {% endif %}
+        </a>
+      </div>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
+              href="{% url 'store:home' %}">
+              <i class="bi bi-house-fill"></i> Home
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}"
+              href="#" data-bs-toggle="dropdown">
+              <i class="bi bi-grid-fill"></i> Products
+            </a>
+            <ul class="dropdown-menu dropdown-menu-farm">
+              <li><a class="dropdown-item" href="{% url 'store:product_list' %}">All Products</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              {% for cat in categories %}
+              <li><a class="dropdown-item" href="{% url 'store:product_list' %}?category={{ cat.slug }}">{{ cat.icon }} {{ cat.name }}</a></li>
+              {% empty %}
+              <li><span class="dropdown-item text-muted">No categories</span></li>
+              {% endfor %}
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}"
+              href="{% url 'store:contact' %}">
+              <i class="bi bi-telephone-fill"></i> Contact
+            </a>
+          </li>
+          {% if user.is_staff %}
+          <li class="nav-item">
+            <a class="nav-link text-warning fw-bold" href="{% url 'store:admin_dashboard' %}">
+              <i class="bi bi-speedometer2"></i> Admin Dashboard
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+
+        <!-- Right Nav -->
+        <div class="d-flex align-items-center gap-2">
+          <!-- Cart -->
+          <a href="{% url 'store:cart' %}"
+            class="btn btn-outline-warning position-relative d-none d-lg-flex align-items-center gap-1">
+            <i class="bi bi-cart3"></i>
+            <span>Cart</span>
+            {% if cart_count > 0 %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ cart_count
+              }}</span>
+            {% endif %}
+          </a>
+
+          {% if user.is_authenticated %}
+          <div class="dropdown">
+            <button class="btn btn-farm-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i> {{ user.first_name|default:user.username }}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-farm">
+              <li><a class="dropdown-item" href="{% url 'store:my_orders' %}"><i class="bi bi-bag-check"></i> My
+                  Orders</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item text-warning fw-bold" href="{% url 'store:admin_dashboard' %}"><i
+                    class="bi bi-speedometer2"></i> Admin Panel</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <form action="{% url 'store:logout' %}" method="post" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right"></i>
+                    Logout</button>
+                </form>
+              </li>
+            </ul>
+          </div>
+          {% else %}
+          <a href="{% url 'store:login' %}" class="btn btn-outline-warning btn-sm">
+            <i class="bi bi-person"></i> Login
+          </a>
+          <a href="{% url 'store:register' %}" class="btn btn-farm-primary btn-sm">
+            <i class="bi bi-person-plus"></i> Register
+          </a>
+          <a href="{% url 'store:admin_dashboard' %}" class="btn btn-sm"
+            style="background:#f59e0b;color:#000;font-weight:600">
+            <i class="bi bi-speedometer2"></i> Admin
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages -->
+  {% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Main Content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ════════════════════ FOOTER ════════════════════ -->
+  <footer class="footer-farm mt-5">
+    <div class="container">
+      <div class="row gy-4">
+        <div class="col-lg-4 col-md-6">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <img src="{% static 'img/logo.png' %}" alt="Mithila Gold Logo" class="footer-logo"
+              onerror="this.onerror=null;this.style.display='none';">
+            <div>
+              <h5 class="mb-0 fw-bold" style="color:var(--gold-light);font-family:'Cinzel',serif;">Mithila Gold</h5>
+              <small style="color:rgba(253,246,227,0.65);font-size:0.7rem;letter-spacing:0.06em;">The Essence of Tradition in Every Crunch</small>
+            </div>
+          </div>
+          <p class="text-light opacity-75 small">{{ site_settings.tagline }}</p>
+          <p class="mb-1"><i class="bi bi-geo-alt-fill text-warning me-2"></i><small>{{ site_settings.address }}</small>
+          </p>
+          <p class="mb-0"><i class="bi bi-signpost-fill text-warning me-2"></i><small>{{ site_settings.landmark
+              }}</small></p>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h6 class="fw-bold mb-3" style="color:var(--gold-light);font-family:'Cinzel',serif;letter-spacing:0.06em;">Quick Links</h6>
+          <ul class="list-unstyled">
+            <li><a href="{% url 'store:home' %}" class="footer-link">🏠 Home</a></li>
+            <li><a href="{% url 'store:product_list' %}" class="footer-link">🛒 Products</a></li>
+            <li><a href="{% url 'store:contact' %}" class="footer-link">📞 Contact</a></li>
+            <li><a href="{% url 'store:my_orders' %}" class="footer-link">📦 My Orders</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-6">
+          <h6 class="fw-bold mb-3" style="color:var(--gold-light);font-family:'Cinzel',serif;letter-spacing:0.06em;">Categories</h6>
+          <ul class="list-unstyled">
+            {% for cat in categories %}
+            <li><a href="{% url 'store:product_list' %}?category={{ cat.slug }}" class="footer-link">{{ cat.icon }} {{ cat.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h6 class="fw-bold mb-3" style="color:var(--gold-light);font-family:'Cinzel',serif;letter-spacing:0.06em;">Contact Us</h6>
+          <p class="mb-1">
+            <i class="bi bi-telephone-fill text-warning me-2"></i>
+            <a href="tel:{{ site_settings.phone_primary }}" class="footer-link">Satyan Jha: {{ site_settings.phone_primary }}</a>
+          </p>
+          {% if site_settings.phone_secondary %}
+          <p class="mb-1">
+            <i class="bi bi-telephone-fill text-warning me-2"></i>
+            <a href="tel:{{ site_settings.phone_secondary }}" class="footer-link">Alt Phone: {{ site_settings.phone_secondary }}</a>
+          </p>
+          {% endif %}
+          {% if site_settings.email %}
+          <p class="mb-1">
+            <i class="bi bi-envelope-fill text-warning me-2"></i>
+            <a href="mailto:{{ site_settings.email }}" class="footer-link">{{ site_settings.email }}</a>
+          </p>
+          {% endif %}
+          <p class="mb-0 mt-2">
+            <i class="bi bi-receipt text-warning me-2"></i>
+            <small class="text-light opacity-75">GST: {{ site_settings.gst_number }}</small>
+          </p>
+        </div>
+      </div>
+      <hr class="border-secondary mt-4">
+      <div class="row align-items-center py-3">
+        <div class="col-md-6 text-center text-md-start">
+          <small class="text-light opacity-50">© 2025 Mithila Gold. All rights reserved.</small>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <small class="text-light opacity-50">Developed by ❤️ Satyam Jha</small>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+
+</html>

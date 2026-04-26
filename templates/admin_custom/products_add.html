@@ -1,0 +1,218 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block title %}Add Product — Admin{% endblock %}
+{% block page_heading %}Add Product{% endblock %}
+
+{% block content %}
+<div class="adm-page-header">
+  <div>
+    <h1>➕ Add New Product</h1>
+    <p>Fill in the details to add a product to the catalog.</p>
+  </div>
+  <a href="{% url 'store:admin_products_list' %}" class="adm-btn adm-btn-ghost">
+    <i class="bi bi-arrow-left"></i> Back to Products
+  </a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="adm-card">
+      <div class="adm-card-header">
+        <span><i class="bi bi-box-seam" style="color:var(--admin-accent)"></i> &nbsp;Product Details</span>
+      </div>
+      <div class="adm-card-body">
+        <form method="post" enctype="multipart/form-data" id="productForm">
+          {% csrf_token %}
+
+          <div class="adm-form-group">
+            <label>Product Name *</label>
+            <input type="text" name="name" class="adm-input" value="{{ form.name.value|default:'' }}" placeholder="e.g. Amoxicillin 100g" required>
+            {% if form.name.errors %}<div style="color:var(--admin-red);font-size:.78rem;margin-top:.3rem">{{ form.name.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <div class="adm-form-group">
+                <label>Category *</label>
+                <select name="category" class="adm-select" required>
+                  <option value="">— Select Category —</option>
+                  {% for cat in categories %}
+                    <option value="{{ cat.pk }}" {% if form.category.value == cat.pk|stringformat:"s" %}selected{% endif %}>{{ cat }}</option>
+                  {% endfor %}
+                </select>
+                {% if form.category.errors %}<div style="color:var(--admin-red);font-size:.78rem;margin-top:.3rem">{{ form.category.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="adm-form-group">
+                <label>Price (₹) *</label>
+                <input type="number" name="price" class="adm-input" value="{{ form.price.value|default:'' }}" placeholder="0.00" step="0.01" min="0" required>
+                {% if form.price.errors %}<div style="color:var(--admin-red);font-size:.78rem;margin-top:.3rem">{{ form.price.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="adm-form-group">
+                <label>Stock Qty *</label>
+                <input type="number" name="stock" class="adm-input" value="{{ form.stock.value|default:0 }}" placeholder="0" min="0" required>
+                {% if form.stock.errors %}<div style="color:var(--admin-red);font-size:.78rem;margin-top:.3rem">{{ form.stock.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="adm-form-group">
+            <label>Description *</label>
+            <textarea name="description" class="adm-textarea" placeholder="Describe the product, usage, dosage, etc." required>{{ form.description.value|default:'' }}</textarea>
+            {% if form.description.errors %}<div style="color:var(--admin-red);font-size:.78rem;margin-top:.3rem">{{ form.description.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="adm-form-group">
+            <label>Main Featured Image *</label>
+            <input type="file" name="image" class="adm-input" accept="image/*" onchange="previewMainImage(this)">
+            <div class="adm-form-hint">This is the primary image shown in the store.</div>
+          </div>
+
+          <div class="adm-divider"></div>
+          
+          <div class="adm-form-group">
+            <label>Additional Gallery Images (Optional)</label>
+            <div id="galleryGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));gap:.75rem;margin-bottom:1rem;">
+              <!-- Queued thumbnails -->
+              <div id="addGalleryBtn" onclick="document.getElementById('galleryTrigger').click()" style="aspect-ratio:1;border:2px dashed var(--admin-border);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--admin-muted);transition:all .2s;">
+                <i class="bi bi-images" style="font-size:1.5rem"></i>
+                <span style="font-size:.65rem;font-weight:700;margin-top:.4rem">ADD MORE</span>
+              </div>
+            </div>
+            <!-- The invisible input that actually picks files -->
+            <input type="file" id="galleryTrigger" multiple accept="image/*" style="display:none;" onchange="handleQueueFiles(this)">
+            <!-- The invisible input that holds the final queue for POST -->
+            <input type="file" name="gallery_images" id="galleryInput" multiple style="display:none;">
+            <div class="adm-form-hint">You can click "ADD MORE" multiple times to build your gallery before saving.</div>
+          </div>
+
+          <div class="adm-form-group">
+            <label class="adm-checkbox-label">
+              <input type="checkbox" name="is_active" {% if form.is_active.value != False %}checked{% endif %}>
+              Active (visible in the store)
+            </label>
+          </div>
+
+          <div class="adm-divider"></div>
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+            <button type="submit" class="adm-btn adm-btn-primary">
+              <i class="bi bi-check-lg"></i> Add Product
+            </button>
+            <a href="{% url 'store:admin_products_list' %}" class="adm-btn adm-btn-ghost">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <!-- Image preview -->
+    <div class="adm-card mb-3">
+      <div class="adm-card-header"><span>🖼️ &nbsp;Image Preview</span></div>
+      <div class="adm-card-body" style="text-align:center">
+        <div id="imgPreview" style="width:100%;aspect-ratio:1;border-radius:10px;border:2px dashed var(--admin-border);display:flex;align-items:center;justify-content:center;font-size:3rem;color:var(--admin-muted);overflow:hidden;">
+          📦
+        </div>
+      </div>
+    </div>
+    <div class="adm-card mb-3">
+      <div class="adm-card-header"><span>📷 &nbsp;Gallery Preview</span></div>
+      <div class="adm-card-body">
+        <div id="galleryPreview" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(60px, 1fr));gap:.5rem;">
+          <div style="aspect-ratio:1;border:1px dashed var(--admin-border);display:flex;align-items:center;justify-content:center;color:var(--admin-muted);font-size:1.2rem;">🖼️</div>
+        </div>
+      </div>
+    </div>
+    <!-- Tips -->
+    <div class="adm-card">
+      <div class="adm-card-header"><span>💡 &nbsp;Tips</span></div>
+      <div class="adm-card-body">
+        <ul style="color:var(--admin-muted);font-size:.82rem;padding-left:1.1rem;margin:0;line-height:1.8">
+          <li>Use a clear, square product image</li>
+          <li>Set stock to 0 to mark as out-of-stock</li>
+          <li>Uncheck "Active" to hide from the public store</li>
+          <li>Detailed descriptions help farmers decide</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Logic to handle multiple file uploads across multiple selection events
+const galleryDT = new DataTransfer();
+const galleryInput = document.getElementById('galleryInput');
+
+function previewMainImage(input) {
+  const preview = document.getElementById('imgPreview');
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function handleQueueFiles(input) {
+  const grid = document.getElementById('galleryGrid');
+  const addBtn = document.getElementById('addGalleryBtn');
+  
+  if (input.files) {
+    Array.from(input.files).forEach(file => {
+      // Check if we hit the limit of 10
+      if (galleryDT.items.length >= 10) return;
+      
+      // Add to DataTransfer
+      galleryDT.items.add(file);
+      
+      // Create thumbnail
+      const reader = new FileReader();
+      reader.onload = e => {
+        const thumb = document.createElement('div');
+        thumb.className = 'queued-thumb';
+        thumb.style = "position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--admin-border);";
+        thumb.innerHTML = `
+          <img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">
+          <button type="button" onclick="removeFromQueue(this)" data-name="${file.name}" style="position:absolute;top:3px;right:3px;background:rgba(248,81,73,.8);border:none;color:#fff;border-radius:4px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        `;
+        grid.insertBefore(thumb, addBtn);
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    // sync the hidden input that goes to server
+    const realInput = document.getElementById('galleryInput');
+    realInput.files = galleryDT.files;
+    
+    // Clear the trigger input so same file can be selected again
+    input.value = '';
+  }
+}
+
+function removeFromQueue(btn) {
+  const fileName = btn.getAttribute('data-name');
+  const thumb = btn.parentElement;
+  
+  // Remove from DataTransfer
+  for (let i = 0; i < galleryDT.items.length; i++) {
+    if (galleryDT.items[i].getAsFile().name === fileName) {
+      galleryDT.items.remove(i);
+      break;
+    }
+  }
+  
+  // Sync hidden input
+  document.getElementById('galleryInput').files = galleryDT.files;
+  
+  // Remove thumb
+  thumb.remove();
+}
+</script>
+{% endblock %}

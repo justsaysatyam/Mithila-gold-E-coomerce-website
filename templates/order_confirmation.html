@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="confirmation-card text-center">
+        <div class="confirmation-icon animate-bounce">🎉</div>
+        <h2 class="fw-bold mt-3 text-farm-green">Order Confirmed!</h2>
+        <p class="text-muted mb-4">Your order has been placed successfully.</p>
+
+        <div class="order-id-badge mb-4">
+          Order ID: <strong>#{{ order.pk }}</strong>
+        </div>
+
+        <div class="order-detail-box text-start p-4 mb-4">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Customer</span>
+            <span class="fw-bold">{{ order.customer_name }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Phone</span>
+            <span class="fw-bold">{{ order.customer_phone }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Payment Mode</span>
+            <span class="fw-bold">{{ order.payment_mode }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Status</span>
+            <span class="badge bg-warning text-dark">{{ order.get_status_display }}</span>
+          </div>
+          <hr>
+          {% for item in order.items.all %}
+          <div class="d-flex justify-content-between small mb-1">
+            <span>{{ item.product_name }} × {{ item.quantity }}</span>
+            <span>₹{{ item.total }}</span>
+          </div>
+          {% endfor %}
+          <hr>
+          <div class="d-flex justify-content-between">
+            <span class="fw-bold">Grand Total</span>
+            <span class="fw-bold text-warning fs-5">₹{{ order.total_amount }}</span>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+          <a href="{% url 'store:receipt_pdf' order.pk %}" class="btn btn-farm-primary btn-lg px-4">
+            <i class="bi bi-file-pdf me-2"></i>Download Receipt
+          </a>
+          <a href="{% url 'store:my_orders' %}" class="btn btn-outline-success btn-lg px-4">
+            <i class="bi bi-bag-check me-2"></i>My Orders
+          </a>
+          <a href="{% url 'store:product_list' %}" class="btn btn-outline-secondary btn-lg px-4">
+            Continue Shopping
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

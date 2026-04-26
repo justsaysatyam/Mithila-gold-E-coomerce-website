@@ -1,0 +1,11 @@
+Django>=4.2.11
+Pillow
+django-crispy-forms>=2.1
+crispy-bootstrap5>=2024.2
+reportlab>=4.2.2
+psycopg2-binary; sys_platform != 'win32'
+python-decouple>=3.8
+whitenoise>=6.6.0
+gunicorn>=21.2.0
+dj-database-url>=2.1.0
+python-magic; sys_platform != 'win32'

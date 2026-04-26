@@ -1,0 +1,282 @@
+{% extends 'admin_custom/base_admin.html' %}
+{% block title %}Edit Product — Admin{% endblock %}
+{% block page_heading %}Edit Product{% endblock %}
+
+{% block content %}
+<div class="adm-page-header">
+  <div>
+    <h1>✏️ Edit Product</h1>
+    <p>Updating: <strong>{{ product.name }}</strong></p>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <a href="{% url 'store:product_detail' product.pk %}" class="adm-btn adm-btn-ghost" target="_blank">
+      <i class="bi bi-eye"></i> View on Site
+    </a>
+    <a href="{% url 'store:admin_products_list' %}" class="adm-btn adm-btn-ghost">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="adm-card">
+      <div class="adm-card-header">
+        <span><i class="bi bi-pencil-square" style="color:var(--admin-accent)"></i> &nbsp;Product Details</span>
+      </div>
+      <div class="adm-card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="adm-form-group">
+            <label>Product Name *</label>
+            <input type="text" name="name" class="adm-input" value="{{ product.name }}" required>
+            {% if form.name.errors %}<div style="color:var(--admin-red);font-size:.78rem;margin-top:.3rem">{{ form.name.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <div class="adm-form-group">
+                <label>Category *</label>
+                <select name="category" class="adm-select" required>
+                  <option value="">— Select Category —</option>
+                  {% for cat in categories %}
+                    <option value="{{ cat.pk }}" {% if product.category.pk == cat.pk %}selected{% endif %}>{{ cat }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="adm-form-group">
+                <label>Price (₹) *</label>
+                <input type="number" name="price" class="adm-input" value="{{ product.price }}" step="0.01" min="0" required>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="adm-form-group">
+                <label>Stock Qty *</label>
+                <input type="number" name="stock" class="adm-input" value="{{ product.stock }}" min="0" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="adm-form-group">
+            <label>Description *</label>
+            <textarea name="description" class="adm-textarea" required>{{ product.description }}</textarea>
+          </div>
+
+          <div class="adm-form-group">
+            <label>Main Featured Image</label>
+            <input type="file" name="image" class="adm-input" accept="image/*" onchange="previewMainImage(this)">
+            <div class="adm-form-hint">Upload a new image to replace the primary image. Leave blank to keep existing.</div>
+          </div>
+
+          {% if product.image %}
+          <div class="adm-form-group">
+            <label class="adm-checkbox-label">
+              <input type="checkbox" name="clear_image">
+              Remove current primary image
+            </label>
+          </div>
+          {% endif %}
+
+          <div class="adm-divider"></div>
+
+          <!-- Existing Gallery Management -->
+          {% if product.images.all %}
+          <div class="adm-form-group">
+            <label>Existing Gallery (Select images to remove)</label>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(90px, 1fr));gap:1rem;background:rgba(255,255,255,.02);padding:1.25rem;border-radius:12px;border:1px solid var(--admin-border);">
+              {% for img in product.images.all %}
+              <div class="gallery-item-managed" style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:2px solid var(--admin-border);transition:all .2s;">
+                <img src="{{ img.image.url }}" style="width:100%;height:100%;object-fit:cover;">
+                <label style="position:absolute;inset:0;background:rgba(248,81,73,0);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:transparent;">
+                  <input type="checkbox" name="delete_gallery" value="{{ img.pk }}" style="display:none;" onchange="toggleDeleteVisual(this)">
+                  <i class="bi bi-trash3-fill" style="font-size:1.4rem"></i>
+                  <span style="font-size:.6rem;font-weight:800;margin-top:.2rem">DELETE</span>
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="adm-form-hint" style="color:var(--admin-red)">* Check images to mark them for deletion. Changes apply when you Save.</div>
+          </div>
+          {% endif %}
+
+          <!-- New Gallery Management -->
+          <div class="adm-form-group">
+            <label>Add New Gallery Images</label>
+            <div id="galleryGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));gap:.75rem;">
+              <!-- Queued thumbnails -->
+              <div id="addGalleryBtn" onclick="document.getElementById('galleryTrigger').click()" style="aspect-ratio:1;border:2px dashed var(--admin-border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--admin-muted);transition:all .2s;">
+                <i class="bi bi-plus-circle" style="font-size:1.5rem"></i>
+                <span style="font-size:.6rem;font-weight:700;margin-top:.4rem">ADD NEW</span>
+              </div>
+            </div>
+            <!-- The invisible input that actually picks files -->
+            <input type="file" id="galleryTrigger" multiple accept="image/*" style="display:none;" onchange="handleQueueFiles(this)">
+            <!-- The invisible input that holds the final queue for POST -->
+            <input type="file" name="gallery_images" id="galleryInput" multiple style="display:none;">
+            <div class="adm-form-hint">Queue up more images for the product gallery.</div>
+          </div>
+
+          <div class="adm-form-group">
+            <label class="adm-checkbox-label">
+              <input type="checkbox" name="is_active" {% if product.is_active %}checked{% endif %}>
+              Active (visible in the store)
+            </label>
+          </div>
+
+          <div class="adm-divider"></div>
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
+            <button type="submit" class="adm-btn adm-btn-primary">
+              <i class="bi bi-check-lg"></i> Save Changes
+            </button>
+            <a href="{% url 'store:admin_products_list' %}" class="adm-btn adm-btn-ghost">Cancel</a>
+            <div style="flex:1"></div>
+            <!-- Delete button moved to separate form below main form to avoid nested form error -->
+            <button type="button" class="adm-btn adm-btn-danger" onclick="if(confirm('Delete {{ product.name }}? This cannot be undone.')) document.getElementById('deleteProductForm').submit();">
+              <i class="bi bi-trash"></i> Delete Product
+            </button>
+          </div>
+        </form>
+
+        <form id="deleteProductForm" method="post" action="{% url 'store:admin_products_delete' product.pk %}" style="display:none">
+          {% csrf_token %}
+        </form>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="adm-card mb-3">
+      <div class="adm-card-header"><span>🖼️ &nbsp;Current Image</span></div>
+      <div class="adm-card-body" style="text-align:center">
+        <div id="imgPreview" style="width:100%;aspect-ratio:1;border-radius:10px;border:1px solid var(--admin-border);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+          {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width:100%;height:100%;object-fit:cover">
+          {% else %}
+            <span style="font-size:3rem;color:var(--admin-muted)">📦</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-card mb-3">
+      <div class="adm-card-header"><span>📷 &nbsp;New Gallery Preview</span></div>
+      <div class="adm-card-body">
+        <div id="galleryPreview" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(60px, 1fr));gap:.5rem;">
+          <div style="aspect-ratio:1;border:1px dashed var(--admin-border);display:flex;align-items:center;justify-content:center;color:var(--admin-muted);font-size:1.2rem;">🖼️</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-card">
+      <div class="adm-card-header"><span>📊 &nbsp;Product Info</span></div>
+      <div class="adm-card-body" style="font-size:.83rem">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
+          <span style="color:var(--admin-muted)">ID</span>
+          <span style="font-weight:600">#{{ product.pk }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
+          <span style="color:var(--admin-muted)">Created</span>
+          <span>{{ product.created_at|date:"d M Y" }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
+          <span style="color:var(--admin-muted)">Last Updated</span>
+          <span>{{ product.updated_at|date:"d M Y" }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--admin-muted)">Stock Status</span>
+          {% if product.in_stock %}
+            <span class="adm-badge green">In Stock</span>
+          {% else %}
+            <span class="adm-badge red">Out of Stock</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const galleryDT = new DataTransfer();
+const galleryInput = document.getElementById('galleryInput');
+
+function previewMainImage(input) {
+  const preview = document.getElementById('imgPreview');
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function handleQueueFiles(input) {
+  const grid = document.getElementById('galleryGrid');
+  const addBtn = document.getElementById('addGalleryBtn');
+  
+  if (input.files) {
+    Array.from(input.files).forEach(file => {
+      // Limit to 10 total (approx check)
+      if (galleryDT.items.length >= 10) return;
+      
+      galleryDT.items.add(file);
+      
+      const reader = new FileReader();
+      reader.onload = e => {
+        const thumb = document.createElement('div');
+        thumb.style = "position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--admin-border);";
+        thumb.innerHTML = `
+          <img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">
+          <button type="button" onclick="removeFromQueue(this)" data-name="${file.name}" style="position:absolute;top:3px;right:3px;background:rgba(248,81,73,.8);border:none;color:#fff;border-radius:4px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        `;
+        grid.insertBefore(thumb, addBtn);
+      };
+      reader.readAsDataURL(file);
+    });
+    
+    // Sync the hidden input
+    document.getElementById('galleryInput').files = galleryDT.files;
+    // Clear the trigger
+    input.value = '';
+  }
+}
+
+function removeFromQueue(btn) {
+  const fileName = btn.getAttribute('data-name');
+  const thumb = btn.parentElement;
+  
+  for (let i = 0; i < galleryDT.items.length; i++) {
+    if (galleryDT.items[i].getAsFile().name === fileName) {
+      galleryDT.items.remove(i);
+      break;
+    }
+  }
+  
+  // Sync hidden input
+  document.getElementById('galleryInput').files = galleryDT.files;
+  thumb.remove();
+}
+
+function toggleDeleteVisual(checkbox) {
+  const label = checkbox.parentElement;
+  const item = label.parentElement;
+  if (checkbox.checked) {
+    label.style.background = 'rgba(248,81,73,0.9)';
+    label.style.color = '#fff';
+    item.style.borderColor = 'var(--admin-red)';
+  } else {
+    label.style.background = 'rgba(248,81,73,0)';
+    label.style.color = 'transparent';
+    item.style.borderColor = 'var(--admin-border)';
+  }
+}
+</script>
+{% endblock %}

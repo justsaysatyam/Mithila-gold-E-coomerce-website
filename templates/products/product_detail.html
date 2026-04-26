@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'store:home' %}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'store:product_list' %}">Products</a></li>
+      <li class="breadcrumb-item active">{{ product.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-5 align-items-start">
+    <!-- Product Image & Gallery -->
+    <div class="col-md-5">
+      <div class="product-detail-img-wrapper mb-3">
+        <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-detail-img" id="mainImage">
+      </div>
+      
+      {% if product.images.all %}
+      <div class="product-gallery d-flex gap-2 flex-wrap mt-3">
+        <!-- Include main image in gallery too -->
+        {% if product.image %}
+        <div class="gallery-thumb border rounded overflow-hidden cursor-pointer active" onclick="updateMainImage('{{ product.image.url }}', this)" style="width:70px;height:70px;cursor:pointer;">
+          <img src="{{ product.image.url }}" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        {% endif %}
+        
+        {% for img in product.images.all %}
+        <div class="gallery-thumb border rounded overflow-hidden cursor-pointer" onclick="updateMainImage('{{ img.image.url }}', this)" style="width:70px;height:70px;cursor:pointer;opacity:0.7;">
+          <img src="{{ img.image.url }}" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Product Info -->
+    <div class="col-md-7">
+      <span class="product-category-badge mb-2 d-inline-block">{{ product.category }}</span>
+      <h1 class="fw-bold mb-2">{{ product.name }}</h1>
+      <div class="product-detail-price mb-3">₹{{ product.price }}</div>
+
+      <!-- Stock Status -->
+      <div class="mb-4">
+        {% if product.in_stock %}
+          <span class="badge bg-success fs-6 px-3 py-2">✅ In Stock ({{ product.stock }} available)</span>
+        {% else %}
+          <span class="badge bg-danger fs-6 px-3 py-2">❌ Out of Stock</span>
+        {% endif %}
+      </div>
+
+      <!-- Description -->
+      <div class="product-description mb-4">
+        <h6 class="fw-bold text-farm-green">Description</h6>
+        <p>{{ product.description }}</p>
+      </div>
+
+      <!-- Add to Cart -->
+      {% if product.in_stock %}
+      <form action="{% url 'store:add_to_cart' product.pk %}" method="post" class="d-flex gap-3 flex-wrap align-items-center mb-4">
+        {% csrf_token %}
+        <div class="qty-control d-flex align-items-center gap-2">
+          <label class="fw-bold">Qty:</label>
+          <div class="input-group" style="width: 130px;">
+            <button type="button" class="btn btn-outline-secondary" onclick="changeQty(-1)">−</button>
+            <input type="number" name="quantity" id="qty-input" class="form-control text-center" value="1" min="1" max="{{ product.stock }}">
+            <button type="button" class="btn btn-outline-secondary" onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-farm-primary btn-lg px-5 fw-bold">
+          <i class="bi bi-cart-plus me-2"></i>Add to Cart
+        </button>
+        <a href="{% url 'store:cart' %}" class="btn btn-outline-warning btn-lg">
+          <i class="bi bi-cart3"></i> View Cart
+        </a>
+      </form>
+      {% else %}
+        <button class="btn btn-secondary btn-lg px-5" disabled>Out of Stock</button>
+      {% endif %}
+
+      <!-- Info Cards -->
+      <div class="row g-2 mt-2">
+        <div class="col-4">
+          <div class="info-mini-card text-center">
+            <div>🚚</div>
+            <small>Local Delivery</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="info-mini-card text-center">
+            <div>✅</div>
+            <small>Quality Assured</small>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="info-mini-card text-center">
+            <div>📞</div>
+            <small>Expert Support</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {% if related_products %}
+  <div class="mt-5">
+    <h4 class="fw-bold mb-4">Related <span class="text-gradient">Products</span></h4>
+    <div class="row g-4">
+      {% for rel in related_products %}
+      <div class="col-6 col-md-3">
+        <div class="product-card h-100">
+          <a href="{% url 'store:product_detail' rel.pk %}" class="product-img-link">
+            {% if rel.image %}
+              <img src="{{ rel.image.url }}" alt="{{ rel.name }}" class="product-img">
+            {% else %}
+              <div class="product-img-placeholder">{{ rel.category.icon|default:"🛒" }}</div>
+            {% endif %}
+          </a>
+          <div class="product-card-body">
+            <h6 class="product-name"><a href="{% url 'store:product_detail' rel.pk %}">{{ rel.name }}</a></h6>
+            <div class="product-price">₹{{ rel.price }}</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeQty(delta) {
+  const input = document.getElementById('qty-input');
+  const max = parseInt(input.max) || 999;
+  const val = parseInt(input.value) + delta;
+  if (val >= 1 && val <= max) input.value = val;
+}
+
+function updateMainImage(url, thumb) {
+  const mainImg = document.getElementById('mainImage');
+  if (mainImg) {
+    mainImg.src = url;
+  } else {
+    // If it was a placeholder, replace it
+    const wrapper = document.querySelector('.product-detail-img-wrapper');
+    wrapper.innerHTML = `<img src="${url}" alt="{{ product.name }}" class="product-detail-img" id="mainImage">`;
+  }
+  
+  // Highlight active thumb
+  document.querySelectorAll('.gallery-thumb').forEach(el => {
+    el.style.opacity = '0.7';
+    el.style.borderColor = 'var(--admin-border)';
+  });
+  thumb.style.opacity = '1';
+  thumb.style.borderColor = 'var(--text-farm-green)';
+}
+</script>
+{% endblock %}
