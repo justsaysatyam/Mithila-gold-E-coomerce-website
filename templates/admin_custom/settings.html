@@ -18,8 +18,24 @@
         <span><i class="bi bi-building" style="color:var(--admin-accent)"></i> &nbsp;Company Information</span>
       </div>
       <div class="adm-card-body">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
+
+          {% if form.errors %}
+          <div class="alert alert-danger shadow-sm border-0 mb-4" style="border-radius:12px;">
+            <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Please correct the following errors:</h6>
+            <ul class="mb-0 mt-2 small">
+              {% for field in form %}
+                {% for error in field.errors %}
+                  <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+              {% endfor %}
+              {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
 
           <div class="adm-form-group">
             <label>Company Name</label>
@@ -67,6 +83,19 @@
             <label>Google Maps Embed URL</label>
             <input type="url" name="maps_embed_url" class="adm-input" value="{{ form.maps_embed_url.value|default:'' }}" placeholder="https://maps.google.com/maps?q=…">
             <div class="adm-form-hint">Paste the embed URL from Google Maps → Share → Embed a map.</div>
+          </div>
+
+          <div class="adm-divider"></div>
+          
+          <div class="adm-form-group">
+            <label>Homepage Advertisement Video (Promo Video)</label>
+            <input type="file" name="promo_video" class="adm-input" accept="video/*">
+            <div class="adm-form-hint">Upload a promotional video to play automatically on the homepage.</div>
+            {% if form.instance.promo_video %}
+              <div class="mt-2" style="font-size:0.85rem; color:var(--admin-muted);">
+                Current video: <a href="{{ form.instance.promo_video.url }}" target="_blank">View Video</a>
+              </div>
+            {% endif %}
           </div>
 
           <div class="adm-divider"></div>

@@ -503,9 +503,12 @@ def admin_site_settings(request):
         return render(request, 'admin_custom/access_denied.html', status=403)
     settings_obj = SiteSettings.get_settings()
     if request.method == 'POST':
-        form = SiteSettingsForm(request.POST, instance=settings_obj)
+        form = SiteSettingsForm(request.POST, request.FILES, instance=settings_obj)
         if form.is_valid():
-            form.save()
+            settings_instance = form.save(commit=False)
+            if 'promo_video' in request.FILES:
+                settings_instance.promo_video = request.FILES['promo_video']
+            settings_instance.save()
             messages.success(request, '✅ Site settings updated successfully!')
             return redirect('store:admin_settings')
     else:
@@ -593,9 +596,13 @@ def admin_products_add(request):
                 price=price,
                 stock=stock,
                 is_active=is_active,
+                video_url=request.POST.get('video_url', '').strip(),
             )
             if image:
                 product.image = image
+            video_file = request.FILES.get('video_file')
+            if video_file:
+                product.video_file = video_file
             product.save()
 
             # Handle gallery images (up to 10)
@@ -658,10 +665,19 @@ def admin_products_edit(request, pk):
             product.price = price
             product.stock = stock
             product.is_active = is_active
+            product.video_url = request.POST.get('video_url', '').strip()
+            
             if clear_image:
                 product.image = None
             if image:
                 product.image = image
+                
+            if request.POST.get('clear_video') == 'on':
+                product.video_file = None
+            video_file = request.FILES.get('video_file')
+            if video_file:
+                product.video_file = video_file
+                
             product.save()
 
             # Handle gallery deletions

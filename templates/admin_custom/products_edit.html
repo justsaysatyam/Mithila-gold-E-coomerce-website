@@ -80,6 +80,27 @@
           </div>
           {% endif %}
 
+          <div class="adm-form-group">
+            <label>Product Video (File)</label>
+            <input type="file" name="video_file" class="adm-input" accept="video/*">
+            <div class="adm-form-hint">Upload a video file for the product gallery. Leave blank to keep existing.</div>
+          </div>
+          
+          {% if product.video_file %}
+          <div class="adm-form-group">
+            <label class="adm-checkbox-label">
+              <input type="checkbox" name="clear_video">
+              Remove current video file
+            </label>
+          </div>
+          {% endif %}
+
+          <div class="adm-form-group">
+            <label>Product Video (URL)</label>
+            <input type="url" name="video_url" class="adm-input" value="{{ product.video_url|default:'' }}" placeholder="https://www.youtube.com/watch?v=...">
+            <div class="adm-form-hint">Or provide a YouTube/Vimeo video link.</div>
+          </div>
+
           <div class="adm-divider"></div>
 
           <!-- Existing Gallery Management -->

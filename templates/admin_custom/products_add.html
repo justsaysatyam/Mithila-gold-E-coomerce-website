@@ -70,6 +70,18 @@
             <div class="adm-form-hint">This is the primary image shown in the store.</div>
           </div>
 
+          <div class="adm-form-group">
+            <label>Product Video (File)</label>
+            <input type="file" name="video_file" class="adm-input" accept="video/*">
+            <div class="adm-form-hint">Upload an optional video file for the product gallery.</div>
+          </div>
+
+          <div class="adm-form-group">
+            <label>Product Video (URL)</label>
+            <input type="url" name="video_url" class="adm-input" value="{{ form.video_url.value|default:'' }}" placeholder="https://www.youtube.com/watch?v=...">
+            <div class="adm-form-hint">Or provide a YouTube/Vimeo video link.</div>
+          </div>
+
           <div class="adm-divider"></div>
           
           <div class="adm-form-group">

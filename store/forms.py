@@ -119,5 +119,6 @@ class SiteSettingsForm(forms.ModelForm):
             'address',
             'landmark',
             'maps_embed_url',
+            'promo_video',
             Submit('submit', 'Save Settings', css_class='btn btn-success mt-3')
         )

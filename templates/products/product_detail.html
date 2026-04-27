@@ -15,24 +15,36 @@
   <div class="row g-5 align-items-start">
     <!-- Product Image & Gallery -->
     <div class="col-md-5">
-      <div class="product-detail-img-wrapper mb-3">
+      <div class="product-detail-img-wrapper mb-3" id="mainMediaWrapper">
         <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-detail-img" id="mainImage">
       </div>
       
-      {% if product.images.all %}
+      {% if product.images.all or product.video_file or product.video_url %}
       <div class="product-gallery d-flex gap-2 flex-wrap mt-3">
         <!-- Include main image in gallery too -->
         {% if product.image %}
-        <div class="gallery-thumb border rounded overflow-hidden cursor-pointer active" onclick="updateMainImage('{{ product.image.url }}', this)" style="width:70px;height:70px;cursor:pointer;">
+        <div class="gallery-thumb border rounded overflow-hidden cursor-pointer active" onclick="updateMainMedia('image', '{{ product.image.url }}', this)" style="width:70px;height:70px;cursor:pointer;">
           <img src="{{ product.image.url }}" style="width:100%;height:100%;object-fit:cover;">
         </div>
         {% endif %}
         
         {% for img in product.images.all %}
-        <div class="gallery-thumb border rounded overflow-hidden cursor-pointer" onclick="updateMainImage('{{ img.image.url }}', this)" style="width:70px;height:70px;cursor:pointer;opacity:0.7;">
+        <div class="gallery-thumb border rounded overflow-hidden cursor-pointer" onclick="updateMainMedia('image', '{{ img.image.url }}', this)" style="width:70px;height:70px;cursor:pointer;opacity:0.7;">
           <img src="{{ img.image.url }}" style="width:100%;height:100%;object-fit:cover;">
         </div>
         {% endfor %}
+
+        {% if product.video_file %}
+        <div class="gallery-thumb border rounded overflow-hidden cursor-pointer" onclick="updateMainMedia('video', '{{ product.video_file.url }}', this)" style="width:70px;height:70px;cursor:pointer;opacity:0.7;display:flex;align-items:center;justify-content:center;background:#000;color:#fff;font-size:1.5rem;">
+          ▶️
+        </div>
+        {% endif %}
+
+        {% if product.video_url %}
+        <div class="gallery-thumb border rounded overflow-hidden cursor-pointer" onclick="updateMainMedia('youtube', '{{ product.video_url }}', this)" style="width:70px;height:70px;cursor:pointer;opacity:0.7;display:flex;align-items:center;justify-content:center;background:#ff0000;color:#fff;font-size:1.5rem;">
+          <i class="bi bi-youtube"></i>
+        </div>
+        {% endif %}
       </div>
       {% endif %}
     </div>
@@ -142,14 +154,23 @@ function changeQty(delta) {
   if (val >= 1 && val <= max) input.value = val;
 }
 
-function updateMainImage(url, thumb) {
-  const mainImg = document.getElementById('mainImage');
-  if (mainImg) {
-    mainImg.src = url;
-  } else {
-    // If it was a placeholder, replace it
-    const wrapper = document.querySelector('.product-detail-img-wrapper');
+function updateMainMedia(type, url, thumb) {
+  const wrapper = document.getElementById('mainMediaWrapper');
+  
+  if (type === 'image') {
     wrapper.innerHTML = `<img src="${url}" alt="{{ product.name }}" class="product-detail-img" id="mainImage">`;
+  } else if (type === 'video') {
+    wrapper.innerHTML = `<video src="${url}" controls autoplay class="product-detail-img" style="width:100%;height:100%;object-fit:contain;background:#000;border-radius:12px;"></video>`;
+  } else if (type === 'youtube') {
+    let ytId = '';
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+      ytId = match[2];
+      wrapper.innerHTML = `<iframe style="width:100%;aspect-ratio:1;border-radius:12px;" src="https://www.youtube.com/embed/${ytId}?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    } else {
+      wrapper.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1;background:#f8f9fa;border-radius:12px;"><a href="${url}" target="_blank" class="btn btn-danger"><i class="bi bi-youtube"></i> Watch Video</a></div>`;
+    }
   }
   
   // Highlight active thumb

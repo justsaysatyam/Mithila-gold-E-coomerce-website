@@ -18,6 +18,7 @@ class SiteSettings(models.Model):
         blank=True,
         default='https://maps.google.com/maps?q=Belhwar+Durga+Mandir+Madhubani+Bihar&output=embed'
     )
+    promo_video = models.FileField(upload_to='site/videos/', blank=True, null=True, help_text="Advertisement video for homepage")
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -59,6 +60,8 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
+    video_file = models.FileField(upload_to='products/videos/', blank=True, null=True, help_text="Upload a video file")
+    video_url = models.URLField(blank=True, null=True, help_text="Or provide a YouTube/Vimeo video URL")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
