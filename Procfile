@@ -1,1 +1,1 @@
-web: gunicorn poultry_farm.wsgi
+web: python manage.py migrate && gunicorn poultry_farm.wsgi
