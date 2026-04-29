@@ -30,6 +30,12 @@ class FarmerRegisterForm(UserCreationForm):
             Submit('submit', 'Register as Farmer', css_class='btn btn-success w-100 mt-3')
         )
 
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if Farmer.objects.filter(phone=phone).exists():
+            raise forms.ValidationError("This phone number is already registered.")
+        return phone
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.first_name = self.cleaned_data['first_name']
