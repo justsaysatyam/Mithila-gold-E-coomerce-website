@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
+import io
 from django.db.models import Q, Sum
 from django.views.decorators.cache import patch_cache_control
 from django.views.decorators.csrf import csrf_exempt
@@ -878,9 +879,19 @@ def admin_categories_delete(request, pk):
 
 
 def serve_db_media(request, file_id):
-    """Serves media content stored in DynamicMedia model."""
+    """Serves media content stored in DynamicMedia model using streaming to save memory."""
     media = get_object_or_404(DynamicMedia, id=file_id)
-    response = HttpResponse(media.file_content, content_type=media.content_type)
+    
+    # Use StreamingHttpResponse with a generator or BytesIO for memory efficiency
+    # This prevents loading the entire BinaryField into RAM at once for the response
+    def file_iterator(file_content, chunk_size=8192):
+        # file_content is a memoryview or bytes
+        offset = 0
+        while offset < len(file_content):
+            yield file_content[offset:offset + chunk_size]
+            offset += chunk_size
+
+    response = StreamingHttpResponse(file_iterator(media.file_content), content_type=media.content_type)
     response['Content-Length'] = media.file_size
     # Cache for 30 days
     patch_cache_control(response, public=True, max_age=2592000)

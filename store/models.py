@@ -28,10 +28,17 @@ class DynamicMedia(models.Model):
 
 
 def upload_to_db(file_field):
-    """Helper to convert a file field upload to a DynamicMedia record."""
+    """Helper to convert a file field upload to a DynamicMedia record with memory safety."""
     if not file_field:
         return None
     
+    # ── Memory Safety Check ───────────────────
+    # Limit uploads to 20MB to prevent OOM on 512MB RAM instances
+    MAX_SIZE = 20 * 1024 * 1024 # 20MB
+    if file_field.size > MAX_SIZE:
+        print(f"File too large: {file_field.size} bytes. Limit is {MAX_SIZE}")
+        return None
+
     try:
         # Check if file exists on storage if it's a FieldFile
         if hasattr(file_field, 'name') and not hasattr(file_field, 'file'):
@@ -41,7 +48,7 @@ def upload_to_db(file_field):
             except:
                 return None
 
-        # Read content
+        # Read content (still reads into memory, but capped at 20MB)
         file_field.seek(0)
         content = file_field.read()
         name = os.path.basename(file_field.name)
