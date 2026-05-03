@@ -27,7 +27,7 @@ class FarmerRegisterForm(UserCreationForm):
             'phone',
             'address',
             Row(Column('password1', css_class='col-md-6'), Column('password2', css_class='col-md-6')),
-            Submit('submit', 'Register as Farmer', css_class='btn btn-success w-100 mt-3')
+            Submit('submit', 'Register Now', css_class='btn btn-success w-100 mt-3')
         )
 
     def clean_phone(self):

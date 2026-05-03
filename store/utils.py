@@ -20,17 +20,20 @@ from .models import SiteSettings, PaymentReceipt
 
 # ── Font Registration (for Rupee Symbol support) ──────
 def register_fonts():
-    # Try common paths for DejaVuSans which supports Rupee (₹)
+    # Try common paths for fonts that support Rupee (₹)
     font_paths = [
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # Linux
-        "/usr/share/fonts/dejavu/DejaVuSans.ttf",          # Linux (alt)
-        "C:\\Windows\\Fonts\\arial.ttf",                   # Windows
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",         # Linux
+        "/usr/share/fonts/dejavu/DejaVuSans.ttf",                 # Linux (alt)
+        "C:\\Windows\\Fonts\\DejaVuSans.ttf",                     # Windows (if installed)
+        "C:\\Windows\\Fonts\\SegoeUI.ttf",                        # Windows Segoe UI
+        "C:\\Windows\\Fonts\\arial.ttf",                          # Windows Arial
     ]
     for path in font_paths:
         if os.path.exists(path):
+            name = os.path.splitext(os.path.basename(path))[0]
             try:
-                pdfmetrics.registerFont(TTFont('DejaVuSans', path))
-                return 'DejaVuSans'
+                pdfmetrics.registerFont(TTFont(name, path))
+                return name
             except:
                 pass
     return 'Helvetica' # Fallback
@@ -241,24 +244,45 @@ def _build_receipt_story(doc, settings, receipt, customer_name, customer_phone,
 
     # ── Items Table ──────────────────────────────
     if len(items_data) > 1:
-        # Update header row
-        items_data[0] = [Paragraph(f'<b>{c}</b>', ParagraphStyle('th', textColor=colors.white, fontSize=11, alignment=TA_LEFT if i==0 else TA_RIGHT)) for i, c in enumerate(items_data[0])]
+        # Create a style for table cells to allow wrapping
+        cell_style = ParagraphStyle('TableCell', parent=styles['Normal'], fontSize=10, leading=12)
+        cell_style_right = ParagraphStyle('TableCellRight', parent=cell_style, alignment=TA_RIGHT)
         
-        col_widths = [doc.width * 0.52, doc.width * 0.08, doc.width * 0.2, doc.width * 0.2]
-        items_table = Table(items_data, colWidths=col_widths, repeatRows=1)
+        # Header Style
+        header_style = ParagraphStyle('TableHeader', parent=styles['Normal'], 
+                                       textColor=colors.white, fontSize=11, fontName='Times-Bold')
+        header_style_right = ParagraphStyle('TableHeaderRight', parent=header_style, alignment=TA_RIGHT)
+
+        # Process the entire items_data to use Paragraphs for wrapping and font support
+        formatted_items = []
+        for i, row in enumerate(items_data):
+            if i == 0: # Header
+                formatted_items.append([
+                    Paragraph(f'<b>{row[0]}</b>', header_style),
+                    Paragraph(f'<b>{row[1]}</b>', header_style_right),
+                    Paragraph(f'<b>{row[2].replace("₹", f"<font name=\'{UNICODE_FONT}\'>₹</font>")}</b>', header_style_right),
+                    Paragraph(f'<b>{row[3].replace("₹", f"<font name=\'{UNICODE_FONT}\'>₹</font>")}</b>', header_style_right),
+                ])
+            else: # Data rows
+                formatted_items.append([
+                    Paragraph(row[0], cell_style),
+                    Paragraph(row[1], cell_style_right),
+                    Paragraph(row[2].replace('₹', f'<font name="{UNICODE_FONT}">₹</font>'), cell_style_right),
+                    Paragraph(row[3].replace('₹', f'<font name="{UNICODE_FONT}">₹</font>'), cell_style_right),
+                ])
+
+        col_widths = [doc.width * 0.45, doc.width * 0.1, doc.width * 0.22, doc.width * 0.23]
+        items_table = Table(formatted_items, colWidths=col_widths, repeatRows=1)
         items_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), CRIMSON),
-            ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
-            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-            ('FONTSIZE', (0, 1), (-1, -1), 11),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, STRIPE_COLOR]),
             ('LINEBELOW', (0, 0), (-1, 0), 2, GOLD),
             ('LINEBELOW', (0, -1), (-1, -1), 1, GOLD),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-            ('TOPPADDING', (0, 0), (-1, -1), 10),
-            ('LEFTPADDING', (0, 0), (-1, -1), 12),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 12),
-            ('FONTNAME', (2, 1), (3, -1), UNICODE_FONT if UNICODE_FONT != "Helvetica" else "Helvetica"),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (-1, -1), 10),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 10),
         ]))
         story.append(items_table)
     else:
@@ -268,11 +292,12 @@ def _build_receipt_story(doc, settings, receipt, customer_name, customer_phone,
 
     # ── Totals Layout ───────────────────────────
     summary_data = [
-        ['', 'Subtotal', f'₹{subtotal:,.2f}'],
-        ['', 'GST (5%)', f'₹{gst_amount:,.2f}'],
+        ['', 'Subtotal', Paragraph(f'₹{subtotal:,.2f}'.replace('₹', f'<font name="{UNICODE_FONT}">₹</font>'), cell_style_right)],
+        ['', 'GST (5%)', Paragraph(f'₹{gst_amount:,.2f}'.replace('₹', f'<font name="{UNICODE_FONT}">₹</font>'), cell_style_right)],
         ['', Paragraph(f'<b>TOTAL AMOUNT</b>', ParagraphStyle('gt', textColor=CRIMSON, fontSize=14, fontName='Times-Bold')), 
-         Paragraph(f'<b>₹{grand_total:,.2f}</b>', ParagraphStyle('gtv', textColor=CRIMSON, fontSize=14, fontName=UNICODE_FONT if UNICODE_FONT != "Helvetica" else "Times-Bold", alignment=TA_RIGHT))],
-        ['', 'Payment Method', f'<b>{payment_mode}</b>'],
+         Paragraph(f'<b>₹{grand_total:,.2f}</b>'.replace('₹', f'<font name="{UNICODE_FONT}">₹</font>'), 
+                   ParagraphStyle('gtv', textColor=CRIMSON, fontSize=14, fontName=UNICODE_FONT if UNICODE_FONT != "Helvetica" else "Times-Bold", alignment=TA_RIGHT))],
+        ['', 'Payment Method', Paragraph(f'<b>{payment_mode}</b>', cell_style_right)],
     ]
     summary_table = Table(summary_data, colWidths=[doc.width * 0.5, doc.width * 0.25, doc.width * 0.25])
     summary_table.setStyle(TableStyle([

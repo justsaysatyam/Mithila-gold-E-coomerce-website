@@ -446,9 +446,32 @@ img { max-width: 100%; }
   border-color: var(--gold);
 }
 
-.product-img-link { display: block; overflow: hidden; height: 190px; background: var(--cream); }
+.product-img-link { 
+  display: block; 
+  overflow: hidden; 
+  height: 190px; 
+  background: var(--cream); 
+  position: relative; /* Added for video positioning */
+}
 .product-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
 .product-card:hover .product-img { transform: scale(1.06); }
+
+/* Hover Video Styles */
+.product-hover-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none; /* Let clicks pass through to the link if needed, though card handles hover */
+}
+
+.product-card:hover .product-hover-video {
+  opacity: 1;
+}
 
 .product-img-placeholder {
   width: 100%; height: 100%;

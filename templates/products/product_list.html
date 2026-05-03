@@ -58,6 +58,9 @@
             <div class="product-card h-100">
               <a href="{% url 'store:product_detail' product.pk %}" class="product-img-link">
                 <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-img">
+                {% if product.video_file_url %}
+                <video src="{{ product.video_file_url }}" muted loop playsinline class="product-hover-video"></video>
+                {% endif %}
               </a>
               <div class="product-card-body">
                 <span class="product-category-badge">{{ product.category }}</span>

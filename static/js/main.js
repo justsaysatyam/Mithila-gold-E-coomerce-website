@@ -55,5 +55,23 @@ document.addEventListener('DOMContentLoaded', function () {
       this.style.display = 'none';
     };
   });
+  
+  // ── Product Hover Video Logic ─────────────────────────────
+  const productCards = document.querySelectorAll('.product-card');
+  productCards.forEach(card => {
+    const video = card.querySelector('.product-hover-video');
+    if (video) {
+      card.addEventListener('mouseenter', () => {
+        video.play().catch(err => {
+          console.log("Autoplay blocked or video error:", err);
+        });
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        video.pause();
+        video.currentTime = 0; // Reset to start
+      });
+    }
+  });
 
 });
