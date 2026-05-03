@@ -39,6 +39,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'store.middleware.MemoryUsageMiddleware',
 ]
 
 ROOT_URLCONF = 'poultry_farm.urls'
@@ -72,9 +73,10 @@ DATABASES = {
     }
 }
 
-# Use PostgreSQL if DATABASE_URL is set
+# Use PostgreSQL if DATABASE_URL is set AND we are not on Windows (local dev)
+# This prevents Neon quota issues from blocking local development.
 DATABASE_URL = config('DATABASE_URL', default='')
-if DATABASE_URL:
+if DATABASE_URL and (os.name != 'nt' or config('FORCE_DB_REMOTE', default=False, cast=bool)):
     DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
 
 AUTH_PASSWORD_VALIDATORS = [

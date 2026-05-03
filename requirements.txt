@@ -10,3 +10,4 @@ gunicorn>=21.2.0
 dj-database-url>=2.1.0
 python-magic; sys_platform != 'win32'
 gevent>=24.2.1
+psutil>=5.9.8
