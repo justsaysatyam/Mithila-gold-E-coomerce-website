@@ -77,7 +77,7 @@ DATABASES = {
 # This prevents Neon quota issues from blocking local development.
 DATABASE_URL = config('DATABASE_URL', default='')
 if DATABASE_URL and (os.name != 'nt' or config('FORCE_DB_REMOTE', default=False, cast=bool)):
-    DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=60)
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
