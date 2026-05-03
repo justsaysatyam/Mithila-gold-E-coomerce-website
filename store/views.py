@@ -13,7 +13,7 @@ import json
 
 from .models import (
     Category, Product, ProductImage, Order, OrderItem,
-    SalesRecord, SalesItem, SiteSettings, Farmer
+    SalesRecord, SalesItem, SiteSettings, Farmer, DynamicMedia
 )
 from .forms import (
     FarmerRegisterForm, FarmerLoginForm,
@@ -875,3 +875,14 @@ def admin_categories_delete(request, pk):
         category.delete()
         messages.success(request, f'🗑️ Category "{name}" deleted.')
     return redirect('store:admin_categories_list')
+
+
+def serve_db_media(request, file_id):
+    """Serves media content stored in DynamicMedia model."""
+    media = get_object_or_404(DynamicMedia, id=file_id)
+    response = HttpResponse(media.file_content, content_type=media.content_type)
+    response['Content-Length'] = media.file_size
+    # Cache for 30 days
+    patch_cache_control(response, public=True, max_age=2592000)
+    return response
+

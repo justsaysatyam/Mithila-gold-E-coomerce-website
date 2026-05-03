@@ -91,9 +91,9 @@
             <label>Homepage Advertisement Video (Promo Video)</label>
             <input type="file" name="promo_video" class="adm-input" accept="video/*">
             <div class="adm-form-hint">Upload a promotional video to play automatically on the homepage.</div>
-            {% if form.instance.promo_video %}
+            {% if form.instance.promo_video_url %}
               <div class="mt-2" style="font-size:0.85rem; color:var(--admin-muted);">
-                Current video: <a href="{{ form.instance.promo_video.url }}" target="_blank">View Video</a>
+                Current video: <a href="{{ form.instance.promo_video_url }}" target="_blank">View Video</a>
               </div>
             {% endif %}
           </div>

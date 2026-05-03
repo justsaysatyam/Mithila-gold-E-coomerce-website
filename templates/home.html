@@ -99,7 +99,7 @@
 </section>
 
 <!-- ══════════ ADVERTISEMENT VIDEO ══════════ -->
-{% if site_settings.promo_video %}
+{% if site_settings.promo_video_url %}
 <section class="py-5" style="background:var(--farm-green,#0a2318);">
   <div class="container text-center">
     <div class="section-header text-white mb-4">
@@ -107,7 +107,7 @@
       <p class="section-subtitle opacity-75" style="color: #fff;">Watch our journey from the ponds of Mithila to your plate</p>
     </div>
     <div class="video-wrapper mx-auto" style="max-width: 900px; border-radius: 15px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1);">
-      <video src="{{ site_settings.promo_video.url }}" autoplay muted loop playsinline controls class="w-100" style="display: block; object-fit: cover;"></video>
+      <video src="{{ site_settings.promo_video_url }}" autoplay muted loop playsinline controls class="w-100" style="display: block; object-fit: cover;"></video>
     </div>
   </div>
 </section>

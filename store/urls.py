@@ -49,4 +49,7 @@ urlpatterns = [
     path('dashboard/products/add/', views.admin_products_add, name='admin_products_add'),
     path('dashboard/products/<int:pk>/edit/', views.admin_products_edit, name='admin_products_edit'),
     path('dashboard/products/<int:pk>/delete/', views.admin_products_delete, name='admin_products_delete'),
+
+    # Dynamic Media
+    path('media/db/<uuid:file_id>/', views.serve_db_media, name='serve_db_media'),
 ]

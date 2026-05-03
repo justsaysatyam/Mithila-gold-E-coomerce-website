@@ -71,7 +71,7 @@
             <div class="adm-form-hint">Upload a new image to replace the primary image. Leave blank to keep existing.</div>
           </div>
 
-          {% if product.image %}
+          {% if product.image or product.image_db %}
           <div class="adm-form-group">
             <label class="adm-checkbox-label">
               <input type="checkbox" name="clear_image">
@@ -86,7 +86,7 @@
             <div class="adm-form-hint">Upload a video file for the product gallery. Leave blank to keep existing.</div>
           </div>
           
-          {% if product.video_file %}
+          {% if product.video_file or product.video_db %}
           <div class="adm-form-group">
             <label class="adm-checkbox-label">
               <input type="checkbox" name="clear_video">
@@ -110,7 +110,7 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(90px, 1fr));gap:1rem;background:rgba(255,255,255,.02);padding:1.25rem;border-radius:12px;border:1px solid var(--admin-border);">
               {% for img in product.images.all %}
               <div class="gallery-item-managed" style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:2px solid var(--admin-border);transition:all .2s;">
-                <img src="{{ img.image.url }}" style="width:100%;height:100%;object-fit:cover;">
+                <img src="{{ img.image_url }}" style="width:100%;height:100%;object-fit:cover;">
                 <label style="position:absolute;inset:0;background:rgba(248,81,73,0);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:transparent;">
                   <input type="checkbox" name="delete_gallery" value="{{ img.pk }}" style="display:none;" onchange="toggleDeleteVisual(this)">
                   <i class="bi bi-trash3-fill" style="font-size:1.4rem"></i>
@@ -174,8 +174,8 @@
       <div class="adm-card-header"><span>🖼️ &nbsp;Current Image</span></div>
       <div class="adm-card-body" style="text-align:center">
         <div id="imgPreview" style="width:100%;aspect-ratio:1;border-radius:10px;border:1px solid var(--admin-border);overflow:hidden;display:flex;align-items:center;justify-content:center;">
-          {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width:100%;height:100%;object-fit:cover">
+          {% if product.image or product.image_db %}
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width:100%;height:100%;object-fit:cover">
           {% else %}
             <span style="font-size:3rem;color:var(--admin-muted)">📦</span>
           {% endif %}

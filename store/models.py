@@ -1,7 +1,64 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.urls import reverse
+from django.core.files.base import ContentFile
 import uuid
+import mimetypes
+import os
+
+
+class DynamicMedia(models.Model):
+    """Stores files as byte arrays in the database."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    file_content = models.BinaryField()
+    file_name = models.CharField(max_length=255)
+    content_type = models.CharField(max_length=100)
+    file_size = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = 'Dynamic Media'
+
+    def __str__(self):
+        return self.file_name
+
+    def get_absolute_url(self):
+        return reverse('store:serve_db_media', kwargs={'file_id': self.id})
+
+
+def upload_to_db(file_field):
+    """Helper to convert a file field upload to a DynamicMedia record."""
+    if not file_field:
+        return None
+    
+    try:
+        # Check if file exists on storage if it's a FieldFile
+        if hasattr(file_field, 'name') and not hasattr(file_field, 'file'):
+            try:
+                if not file_field.storage.exists(file_field.name):
+                    return None
+            except:
+                return None
+
+        # Read content
+        file_field.seek(0)
+        content = file_field.read()
+        name = os.path.basename(file_field.name)
+        content_type, _ = mimetypes.guess_type(name)
+        if not content_type:
+            content_type = 'application/octet-stream'
+            
+        media = DynamicMedia.objects.create(
+            file_content=content,
+            file_name=name,
+            content_type=content_type,
+            file_size=len(content)
+        )
+        return media
+    except (FileNotFoundError, ValueError, Exception) as e:
+        print(f"Skipping upload to DB: {e}")
+        return None
 
 
 class SiteSettings(models.Model):
@@ -19,6 +76,7 @@ class SiteSettings(models.Model):
         default='https://maps.google.com/maps?q=Belhwar+Durga+Mandir+Madhubani+Bihar&output=embed'
     )
     promo_video = models.FileField(upload_to='site/videos/', blank=True, null=True, help_text="Advertisement video for homepage")
+    promo_video_db = models.ForeignKey(DynamicMedia, on_delete=models.SET_NULL, null=True, blank=True, related_name='site_promo_video')
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -29,9 +87,25 @@ class SiteSettings(models.Model):
         return 'Site Settings'
 
     def save(self, *args, **kwargs):
+        # Handle promo_video upload to DB
+        if self.promo_video and not self.promo_video_db:
+            # Only upload if it's a new file (not just a path string)
+            if hasattr(self.promo_video, 'file'):
+                media = upload_to_db(self.promo_video)
+                if media:
+                    self.promo_video_db = media
+
         # Enforce singleton
         self.pk = 1
         super().save(*args, **kwargs)
+
+    @property
+    def promo_video_url(self):
+        if self.promo_video_db:
+            return self.promo_video_db.get_absolute_url()
+        if self.promo_video:
+            return self.promo_video.url
+        return None
 
     @classmethod
     def get_settings(cls):
@@ -60,7 +134,9 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
+    image_db = models.ForeignKey(DynamicMedia, on_delete=models.SET_NULL, null=True, blank=True, related_name='product_main_image')
     video_file = models.FileField(upload_to='products/videos/', blank=True, null=True, help_text="Upload a video file")
+    video_db = models.ForeignKey(DynamicMedia, on_delete=models.SET_NULL, null=True, blank=True, related_name='product_video_file')
     video_url = models.URLField(blank=True, null=True, help_text="Or provide a YouTube/Vimeo video URL")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -78,13 +154,38 @@ class Product(models.Model):
 
     @property
     def image_url(self):
+        if self.image_db:
+            return self.image_db.get_absolute_url()
         if self.image:
             return self.image.url
         # Fallback to first gallery image if main image is missing
         gallery_image = self.images.first()
         if gallery_image:
-            return gallery_image.image.url
+            return gallery_image.image_url
         return '/static/img/product_placeholder.svg'
+
+    @property
+    def video_file_url(self):
+        if self.video_db:
+            return self.video_db.get_absolute_url()
+        if self.video_file:
+            return self.video_file.url
+        return None
+
+    def save(self, *args, **kwargs):
+        # Handle image upload to DB
+        if self.image and hasattr(self.image, 'file'):
+            media = upload_to_db(self.image)
+            if media:
+                self.image_db = media
+        
+        # Handle video upload to DB
+        if self.video_file and hasattr(self.video_file, 'file'):
+            media = upload_to_db(self.video_file)
+            if media:
+                self.video_db = media
+
+        super().save(*args, **kwargs)
 
     def get_all_images(self):
         return self.images.all()
@@ -94,7 +195,24 @@ class ProductImage(models.Model):
     """Additional images for a product gallery."""
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='products/gallery/')
+    image_db = models.ForeignKey(DynamicMedia, on_delete=models.SET_NULL, null=True, blank=True, related_name='gallery_image')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        # Handle image upload to DB
+        if self.image and hasattr(self.image, 'file'):
+            media = upload_to_db(self.image)
+            if media:
+                self.image_db = media
+        super().save(*args, **kwargs)
+
+    @property
+    def image_url(self):
+        if self.image_db:
+            return self.image_db.get_absolute_url()
+        if self.image:
+            return self.image.url
+        return '/static/img/product_placeholder.svg'
 
     def __str__(self):
         return f"Gallery image for {self.product.name}"
