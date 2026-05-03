@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 import io
+from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.views.decorators.cache import patch_cache_control
 from django.views.decorators.csrf import csrf_exempt
@@ -309,7 +310,9 @@ def receipt_pdf(request, pk):
         return redirect('store:my_orders')
 
     buffer = generate_order_receipt_pdf(order)
-    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    content = buffer.getvalue()
+    buffer.close() # Explicitly close buffer to free memory
+    response = HttpResponse(content, content_type='application/pdf')
     # Use a timestamp in filename to bust browser cache
     ts = timezone.now().strftime('%H%M%S')
     response['Content-Disposition'] = f'inline; filename="receipt_order_{pk}_{ts}.pdf"'
@@ -321,7 +324,9 @@ def receipt_pdf(request, pk):
 def sales_receipt_pdf(request, pk):
     sales_record = get_object_or_404(SalesRecord, pk=pk)
     buffer = generate_sales_receipt_pdf(sales_record)
-    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    content = buffer.getvalue()
+    buffer.close() # Explicitly close buffer to free memory
+    response = HttpResponse(content, content_type='application/pdf')
     ts = timezone.now().strftime('%H%M%S')
     response['Content-Disposition'] = f'inline; filename="receipt_sale_{pk}_{ts}.pdf"'
     patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True)
@@ -418,8 +423,13 @@ def admin_sales_list(request):
 
     total_revenue = sales.aggregate(total=Sum('total_amount'))['total'] or 0
 
+    # Pagination
+    paginator = Paginator(sales, 20) # 20 per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
-        'sales': sales,
+        'sales': page_obj, # Use page_obj instead of full queryset
         'total_revenue': total_revenue,
         'payment_choices': SalesRecord.PAYMENT_CHOICES,
         'page_title': 'Sales Records',
@@ -540,8 +550,13 @@ def admin_products_list(request):
             Q(name__icontains=search_query) | Q(description__icontains=search_query)
         )
 
+    # Pagination
+    paginator = Paginator(products, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'products': products,
+        'products': page_obj,
         'categories': categories,
         'current_category': category_slug,
         'search_query': search_query,
@@ -754,8 +769,13 @@ def admin_orders_list(request):
     if status_filter:
         orders = orders.filter(status=status_filter)
         
+    # Pagination
+    paginator = Paginator(orders, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+        
     context = {
-        'orders': orders,
+        'orders': page_obj,
         'status_choices': Order.STATUS_CHOICES,
         'current_status': status_filter,
         'page_title': 'Online Orders',
