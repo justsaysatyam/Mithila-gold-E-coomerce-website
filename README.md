@@ -1,8 +1,7 @@
-# 🐔 Jay Bn Poultry Farm and Feeding Point
+# 🪷 Mithila White Gold
+**Full-stack Django web application** for Mithila White Gold — premium makhana (fox nuts) from the heart of Mithila, Bihar.
 
-**Full-stack Django web application** for Jay Bn Poultry Farm — selling animal medicines, chick feed, healthy chicks, and poultry equipment online.
-
-> **भरोसा आपका, क्वालिटी हमारी — Your Trust, Our Quality.**
+> **मिथिला की धरोहर — हर कौर में।**
 
 ---
 
@@ -170,9 +169,9 @@ gunicorn poultry_farm.wsgi:application
 
 | Field | Value |
 |---|---|
-| Company | Jay Bn Poultry Farm and Feeding Point |
-| Address | Belhwar, Madhubani, Bihar |
-| Landmark | Near Belhwar Durga Mandir |
-| Jay Jha | 7546835444 |
-| Bn Jha | 7544931599 |
+| Company | Mithila White Gold |
+| Address | Darbhanga, Mithila, Bihar |
+| Landmark | Near Darbhanga Tower |
+| Satyam Jha | 6202822415 |
 | GST | 10AAQFJ2396C1ZJ |
+| Tagline | The Essence of Tradition in Every Crunch |

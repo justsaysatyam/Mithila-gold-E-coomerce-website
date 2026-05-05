@@ -1,6 +1,6 @@
-# 🐔 Jay Bn Poultry Farm - System Components & Agents Documentation
+# 🪷 Mithila White Gold - System Components & Agents Documentation
 
-This document defines the roles, responsibilities, and workflows for the automated system agents and components involved in managing the Jay Bn Poultry Farm online and offline operations.
+This document defines the roles, responsibilities, and workflows for the automated system agents and components involved in managing the Mithila White Gold online and offline operations.
 
 ---
 
@@ -39,7 +39,7 @@ This document defines the roles, responsibilities, and workflows for the automat
 - Provide a streamlined custom admin interface (`/admin/sales/add/`) for manual billing.
 - Record `SalesRecord` and `SalesItem` entries directly, bypassing the online cart.
 - Support CSV exports for offline sales analysis.
-**Key Interactions:** Exclusively accessible by the Admin (`Jay Jha`, `Bn Jha`). Triggers walk-in specific receipts.
+**Key Interactions:** Exclusively accessible by the Admin (`Satyam Jha`). Triggers walk-in specific receipts.
 
 ## 5. 📄 Document Generation Agent (ReportLab)
 

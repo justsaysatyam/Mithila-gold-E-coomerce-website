@@ -11,7 +11,7 @@ class Command(BaseCommand):
     help = 'Seed the database with initial categories, sample products, and site settings.'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.MIGRATE_HEADING('Seeding Mithila Gold data...'))
+        self.stdout.write(self.style.MIGRATE_HEADING('Seeding Mithila White Gold data...'))
 
         # ── Site Settings (singleton) ────────────────────────────
         settings, created = SiteSettings.objects.get_or_create(pk=1)

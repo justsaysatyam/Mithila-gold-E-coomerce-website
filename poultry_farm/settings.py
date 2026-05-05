@@ -1,5 +1,5 @@
 """
-Django settings for Mithila Gold
+Django settings for Mithila White Gold
 """
 
 from pathlib import Path

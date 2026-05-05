@@ -1,13 +1,13 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
-{% block title %}Admin | Mithila Gold{% endblock %}
+{% block title %}Admin | Mithila White Gold{% endblock %}
 
 {% block branding %}
 <h1 id="site-name">
     <a href="{% url 'admin:index' %}" style="display: flex; align-items: center; gap: 10px;">
-        <img src="{% static 'img/logo.png' %}" alt="Mithila Gold Logo" style="height: 48px; border-radius: 50%; background: #7A0C2E; object-fit: contain; border: 2px solid #C9962A;">
-        Mithila Gold Admin
+        <img src="{% static 'img/logo.png' %}" alt="Mithila White Gold Logo" style="height: 48px; object-fit: contain;">
+        Mithila White Gold Admin
     </a>
 </h1>
 {% endblock %}
@@ -19,7 +19,7 @@
 {% block extrastyle %}
 {{ block.super }}
 <style>
-    /* Custom UI matching Mithila Gold */
+    /* Custom UI matching Mithila White Gold */
     :root {
         --primary-color: #7A0C2E;    /* Deep Crimson */
         --secondary-color: #C9962A;  /* Royal Gold */

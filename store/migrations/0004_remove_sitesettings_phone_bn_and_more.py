@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='sitesettings',
             name='company_name',
-            field=models.CharField(default='Mithila Gold', max_length=200),
+            field=models.CharField(default='Mithila White Gold', max_length=200),
         ),
         migrations.AlterField(
             model_name='sitesettings',

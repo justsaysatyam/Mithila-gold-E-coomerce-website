@@ -41,7 +41,7 @@ def register_fonts():
 UNICODE_FONT = register_fonts()
 
 
-# ── Color palette (Mithila Gold Premium) ──────
+# ── Color palette (Mithila White Gold Premium) ──────
 GOLD = colors.HexColor('#C9962A')
 GOLD_LIGHT = colors.HexColor('#E8B84B')
 CRIMSON = colors.HexColor('#7A0C2E')
@@ -148,7 +148,7 @@ def _draw_watermark(canvas, doc):
     canvas.setFillAlpha(0.04)
     canvas.translate(A4[0]/2, A4[1]/2)
     canvas.rotate(45)
-    canvas.drawCentredString(0, 0, "MITHILA GOLD")
+    canvas.drawCentredString(0, 0, "MITHILA WHITE GOLD")
     canvas.restoreState()
 
 
@@ -321,12 +321,12 @@ def _build_receipt_story(doc, settings, receipt, customer_name, customer_phone,
     <b>Terms & Conditions:</b><br/>
     1. Goods once sold will not be taken back.<br/>
     2. This is a computer generated invoice and does not require a physical signature.<br/>
-    3. Thank you for choosing Mithila Gold. We value your trust.
+    3. Thank you for choosing Mithila White Gold. We value your trust.
     """
     story.append(Paragraph(terms_text, ParagraphStyle('Terms', fontSize=8, textColor=colors.grey, leading=10)))
     
     story.append(Spacer(1, 20))
-    story.append(Paragraph('🪷 <b>MITHILA GOLD</b>', ParagraphStyle('f1', alignment=TA_CENTER, fontSize=12, textColor=CRIMSON, fontName='Times-Bold')))
+    story.append(Paragraph('🪷 <b>MITHILA WHITE GOLD</b>', ParagraphStyle('f1', alignment=TA_CENTER, fontSize=12, textColor=CRIMSON, fontName='Times-Bold')))
     # Hindi tagline - using the registered Unicode font
     story.append(Paragraph('मिथिला की धरोहर — हर कौर में।', ParagraphStyle('f2', alignment=TA_CENTER, fontSize=10, textColor=GOLD, fontName=UNICODE_FONT)))
 

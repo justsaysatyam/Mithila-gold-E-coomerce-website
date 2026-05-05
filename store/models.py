@@ -70,7 +70,7 @@ def upload_to_db(file_field):
 
 class SiteSettings(models.Model):
     """Singleton model for company/site-wide settings configurable by admin."""
-    company_name = models.CharField(max_length=200, default='Mithila Gold')
+    company_name = models.CharField(max_length=200, default='Mithila White Gold')
     address = models.TextField(default='Darbhanga, Mithila, Bihar')
     landmark = models.CharField(max_length=200, default='')
     phone_primary = models.CharField(max_length=20, default='6202822415', verbose_name='Phone (Satyan Jha)')
